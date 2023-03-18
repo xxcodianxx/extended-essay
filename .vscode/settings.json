@@ -1,0 +1,24 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true,
+        "*.aux": true,
+        "*.fdb_latexmk": true,
+        "*.log": true,
+        "essay.synctex.gz": true,
+        "*.toc": true,
+        "*.fls": true
+    },
+    "explorerExclude.backup": {},
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": false,
+    "python.analysis.typeCheckingMode": "basic"
+}
