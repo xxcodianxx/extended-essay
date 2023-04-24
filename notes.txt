@@ -1,0 +1,31 @@
+Method & Rationale
+
+Link back every section
+
+Diagrams on same page
+
+No rereading
+
+2,2
+
+link why matmul
+
+explain yaw pitch and roll
+
+running commentary on math
+
+more explicit matrix multiplication
+
+example alpha gamme gimball lock
+
+don't define 2 pages ago eg. world axes
+
+annotate ij = k etc.
+
+"explain why im doing what im doingin order to get to ration I need to explain some key terms about quaternions"
+
+kill euler angles
+
+supersede rotation matrices constructed from Euler angles
+
+how we rotate is key
