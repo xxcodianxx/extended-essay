@@ -116,7 +116,6 @@ def point_rotate(p, axis, angle):
         cosine_angle, 
         *[i*sine_angle for i in axis]
     )
-    print(q)
 
     rotated = q * p * q.inverse()
 

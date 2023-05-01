@@ -4,14 +4,16 @@
     amsmath, amssymb, amsfonts, 
     amsthm, lipsum, 
     physics, mathtools, setspace,
-    array, caption, float, subfig,
-    tikz, tikz-3dplot
+    array, caption, float,
+    tikz, tikz-3dplot, multicol
 }
 
 \usepackage[hmarginratio=1:1, margin=0.5in, includeheadfoot]{geometry}
 
 \graphicspath{ {./res/} }
 \usetikzlibrary{decorations.markings}
+\usetikzlibrary{angles, quotes}
+
 % \doublespacing 
 
 \usepackage{xcolor}
@@ -20,7 +22,7 @@
 
 \title{\vspace{-3cm}Applications of Quaternions in 3D Rotation}
 \author{Martin Velikov}
-\date{To what extent can quaternions supersede rotation matrices and Euler
+\date{To what extent can quaternions supersede rotation matrices constructed from Euler
     angles in representing 3D rotation?}
 
 \begin{document}
@@ -31,113 +33,324 @@
 \pagebreak
 
 \section{Introduction}
-In the modern day, digital entertainment industries aim to replicate and extend
-the appearance of our 3D world for artistic effects. Extensive use of 3D
-computer graphics is made in films through CGI (computer generated imagery), or
-in video games through real-time rendering on the player's device. Every day,
-scientists conduct simulation research in three dimensional spaces, i.e. in the
-fields of aerodynamic modeling, astrophysics, weather modelling and
-computational chemistry. In all of these use cases, there is a need for a
+Historically, mathematicians have endeavoured to describe the world around us
+using mathematics. While mathematicians often create simplifications or models
+in lower dimensions, as is the case with fields of mathematics like trigonometry
+and complex numbers, we are ultimately inhabitants of a three dimensional world.
+In the modern day, demand for working in three dimensions is ever increasing,
+with scientific applications in aerodynamic modeling, astrophysics, weather
+modelling and computational chemistry, in addition to numerous uses in computer
+generated imagery (CGI). In all of these use cases, there is a need for a
 rigorous mathematical framework to represent and manipulate the 3D world. \\
 
-\subsection{Three Dimensional Objects}
-In the real world, matter is composed of atoms which move on a microscopic
-level. Any interaction with objects results in the collective transformation of
-these atoms, perceived by us as something moving. In the simulated world, it is
-not practical to simulate the granular motion of the billions of atoms in a
-single object, hence the need for simplification of the way objects are
-represented. \\
+One of the intuitively simplest, but surprisingly complex aspects of
+transitioning from a two dimensional space to three dimensional is the problem
+of rotation. Indeed, there currently exist several competing mathematical models
+for 3D rotation in common use which bear their own strengths and weaknesses. Of
+these, some of the most commonly seen constructs are 3D "rotation matrices",
+which are usually constructed from "Euler angles", and Quaternions.\\
 
-The conventional approach to creating a three dimensional world is to split it
-into intuitive chunks, called "3D models". For example, in a scene with a teapot
-resting on a wooden table, it would make sense to split the teapot and the table
-into separate 3D models, to perform calculations on each of them individually.
-For example, one may wish to move just the teapot, without moving the table. \\
+This investigation aims to compare and contrast these methods of rotation in
+order to draw conclusions about the usefulness and applicability of Quaternions
+in 3D computer graphics and scientific simulations compared to rotation matrices
+constructed from Euler angles.
 
-% In computer graphics, the shape of these objects is represented by a few
-% properties.
+\section{Rotation Matrices}
+Rotation matrices are considered one of the most versatile ways of doing 3D
+rotation. They are often used in computer animation and praised for their
+computational efficiency and versatility. Mathematically, they represent
+specific a 3D linear transformation which, when applied to a set of points,
+describes a 3D rotation.
 
-\subsubsection{Vertices}
-Every object can be represented with a set of three-dimensional points along its
-surface (called "vertices") which define its shape. For maximum detail, vertices
-are usually placed where the shape of the object changes most, like on the
-object's edges or corners. Increasing the number of vertices increases the
-detail of the 3D model's shape.
+\subsection{In two dimensions}
+It is worthwile conceptually exploring what happens in two dimensions first, as
+this will introduce valuable concepts which will help with understanding how
+three dimensional matrices work. \\
 
-\subsubsection{Edges \& Faces}
-Edges are three dimensional straight lines connecting %two or more
-three vertices together, forming a "wireframe" of the object. Faces are filled
-planes between three edges, in total connected to three vertices. In this way, an
-object with a complex shape is approximated to a certain precision with a number
-of faces proportional to the desired precision. \\
+Let 2D points be represented as a vector of the form $\vec{v} = \begin{bmatrix}x
+\\ y \end{bmatrix}$ where $x$ and $y$ represent the x and y coordinates of the
+point respective to the origin. \\
 
-Using this method, nearly every three dimensional object one wants to represent
-can be approximated with a finite number of vertices, edges and faces. \\
+By representing the points as vectors, rotation of a point around the origin
+would be equrivalent to rotating the vector. Consider the rotation of point (1,
+0) by 45 degrees anti-clockwise:
 
 \begin{figure}[H]
     \centering
-    \subfloat[Cube]{
-        \includegraphics[width=5cm]{cube_wireframe.jpg}
-    }
-    \qquad
-    \subfloat[Sphere]{
-        \includegraphics[width=5cm]{icosphere_wireframe.jpg}
-    }
-    \qquad
-    \subfloat[Teapot]{
-        \includegraphics[width=5.75cm]{teapot_wireframe.jpg}
-    }
-    \caption{Wireframe view of various 3D objects}
-    \label{teapot}
+    \begin{tikzpicture}[x=2.5cm,y=2.5cm]
+        \coordinate (Origin) at (0, 0);
+        \coordinate (R) at (0.7071, 0.7071);
+        \coordinate (P) at (1, 0);
+
+        % Draw grid
+        \draw[gray!10, very thin, step=0.1] (-2, -2) grid (2, 2);
+        \draw[gray!50, very thin, step=1] (-2, -2) grid (2, 2);
+
+        \draw[gray!50, dashed] (0, 0) circle (1);
+        
+        % Draw tick marks on the axes
+        \foreach \x in {-2, -1, 1, 2}
+            \draw (\x, 2pt) -- (\x, -2pt) node[below] {\small $\x$};
+        \foreach \y in {-2, -1, 1, 2}
+            \draw (2pt, \y) -- (-2pt, \y) node[left] {\small $\y$};
+
+        \node[below left] at (0, 0) {$0$};
+        
+        % Draw Cartesian axes
+        \draw[<->, thick] (-2, 0) -- (2, 0) node[right] {$x$};
+        \draw[<->, thick] (0, -2) -- (0, 2) node[above] {$y$};
+
+        \pic[draw, angle radius=0.75cm, angle eccentricity=1.7, "$45$\textdegree"] {angle=P--Origin--R};
+        
+        % Draw red vector arrow [1, 0]
+        \draw[->, red, line width=0.6mm, >={stealth}] (0, 0) -- (P) node[midway, below right] {$\begin{bmatrix}1 \\ 0\end{bmatrix}$};
+    
+        % Draw blue vector arrow [0.7071, 0.7071]
+        \draw[->, blue, line width=0.6mm, >={stealth}] (0, 0) -- (R) node[above right] 
+            {$\begin{bmatrix}0.7071 \\ 0.7071\end{bmatrix}$};
+
+        \draw[->, black!60!green, line width=0.6mm, >={stealth}] (0, 0) -- (-0.7, 1.2) node[above] 
+            {$\begin{bmatrix}? \\ ?\end{bmatrix}$};
+
+    \end{tikzpicture}
+    \caption{ Apparent rotation of red vector $\begin{bmatrix}1 \\ 0\end{bmatrix}$ by
+        45\textdegree \space anti-clockwise to blue vector }
+    \label{2d_rot}
 \end{figure}
 
-% A face with three vertices is called a "triangle", and a face with
-% four vertices is called a "quad". While triangles are ensured to be planar,
-% quads are not, meaning that it is difficult to concretely define their normals.
-% For this reason, quads are usually "triangulated" into two triangles. For any
-% models in this investigation, we will assume that all faces are triangles.\\
+From Figure \ref{2d_rot}, it may seem like calculating this rotation is trivial
+by using the trigonometric functions: for any angle $\theta$, the rotation of
+$\begin{bmatrix}1 \\ 0\end{bmatrix}$ is equal to $\begin{bmatrix}\cos\theta \\
+\sin\theta\end{bmatrix}$. \vspace{0.2cm}
 
-\subsection{3D Transformations}
-In the real world, objects are not static. They move, rotate and change shape
-through time. In the simulated world, it is necessary to be able to perform
-similar transformations on the 3D models. A valuable property of the
-vertex-edge-face object representation is that transformations on a whole
-object are a product of smaller transformations on its comprising vertices. \\
+Indeed, this is the case for the simple example above, but the applicability of
+this model quickly breaks down once we increase the complexity. For example,
+rotating the green vector about a point different to the origin by using this
+model is difficult to imagine. Furthermore, if we were to go beyond rotation,
+how could we, say, transform the red vector into the green vector? \\
 
-\subsubsection{Translation}
-Translation is the simplest transformation, and is defined as the movement of an
-object along a vector. For example, if an object is translated by the vector
-$(1, 2, 3)$, it will move by 1 unit along the $x$ axis, 2 units along the $y$
-axis and 3 units along the $z$ axis. In order to translate an object, one would
-simply add the vector to the co-ordinates of each of its vertices. \\
+Linear transformation using matrices elegantly deals with these problems by
+introducing one concept - instead of transforming each individual vector,
+transform the axes themselves. \\
 
-\subsubsection{Scale}
-Scaling is the dilation of an object by a factor along each of the three axes.
-For example, if an object is scaled by a factor of 2 along the $x$ axis, it will
-be twice as wide as before. In order to scale an object, one would simply
-multiply the co-ordinates of each of its vertices by the scale factor. A uniform
-scale refers to dilating an object by all three of the axes equally, which would
-make the object bigger or smaller, but maintain its proportions. \\
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[x=2.5cm,y=2.5cm]
+        \coordinate (Origin) at (0, 0);
+        \coordinate (R) at (0.8660, 0.5);
+        \coordinate (P) at (1, 0);
 
-\subsubsection{Rotation}
-Rotation is one of the more complex transformations. It is defined as the
-movement of an object's vertices in such a way so that the object appears to
-rotate, while its shape remains unchanged. However, the concept of rotation
-could be ambiguous in that it is not clear how exactly the object should rotate.
-One could rotate the object around the origin, or around its center of mass, or
-in fact around any arbitrary point of reference in 3D space. \\
+        % Draw grid
+        \draw[gray!10, very thin, step=0.1] (-2, -2) grid (2, 2);
+        \draw[gray!50, very thin, step=1] (-2, -2) grid (2, 2);
 
-Due to its complexity, there have been many different ways of defining and
-implementing rotation in three dimensions by many different mathematicians such
-as Leonard Euler, William Rowan Hamilton and Olinde Rodrigues. \\
+        % 45deg
+        \rotatebox{30}{
+            \draw[step=0.1, blue!10, very thin, thin] (-2,-2) grid (2,2);
+            \draw[step=1, blue!50, very thin, thin] (-2,-2) grid (2,2);
+            
+            \foreach \x in {-2, -1, 1, 2}
+                \draw (\x, 2pt) -- (\x, -2pt) node[blue, below left] {\small $\x$};
+            \foreach \y in {-2, -1, 1, 2}
+                \draw (2pt, \y) -- (-2pt, \y) node[blue, below left] {\small $\y$};
 
-Currently, there are three main methods of describing rotation in 3D space:
-Euler angles, rotation matrices and quaternions. In this investigation, we will
-compare and contrast these different rotational methods in order to draw
-conclusions about the usefulness and applicability of quaternions in 3D computer
-graphics and scientific simulations.
+            \draw[<->, blue, thick] (-2, 0) -- (2, 0) node[right] {$x'$};
+            \draw[<->, blue, thick] (0, -2) -- (0, 2) node[above] {$y'$};
+        }
 
-\section{Rotation Matrices}
+        \pic[draw, blue, angle radius=5cm] {angle=P--Origin--R};
+
+        % Draw tick marks on the axes
+        \foreach \x in {-2, -1, 1, 2}
+            \draw (\x, 2pt) -- (\x, -2pt) node[below left] {\small $\x$};
+        \foreach \y in {-2, -1, 1, 2}
+            \draw (2pt, \y) -- (-2pt, \y) node[below left] {\small $\y$};
+
+        \node[below left] at (0, 0) {$0$};
+        
+        % Draw Cartesian axes
+        \draw[<->, thick] (-2, 0) -- (2, 0) node[right] {$x$};
+        \draw[<->, thick] (0, -2) -- (0, 2) node[above] {$y$};
+
+        \pic[draw, angle radius=0.75cm, angle eccentricity=1.7, "$30$\textdegree"] {angle=P--Origin--R};
+        
+        % Draw red vector arrow [1, 0]
+        \draw[->, red, line width=1mm, >={stealth}] (0, 0) -- (P);
+    
+        % Draw blue vector arrow [0.7071, 0.7071]
+        \draw[->, blue, line width=1mm, >={stealth}] (0, 0) -- (R);
+    \end{tikzpicture}
+
+    \vspace{1.5cm}
+    \caption{ Overlay of new cartesian plane (blue) with axes $x'$ and $y'$
+        rotated 30\textdegree \space anti-clockwise relative to the original. }
+    \label{2d_axis_rot}
+\end{figure}
+
+In Figure \ref{2d_axis_rot}, the blue vector's coordinates on the rotated axes
+are identical to the red vector's coordinates on the original - both are
+$\begin{bmatrix}1 \\ 0\end{bmatrix}$. In fact, we find that any one point on our
+original axis has a counterpart on the rotated axis which corresponds to the
+rotation of that point about the origin by $30$\textdegree. If we were to
+examine the coordinates of the blue vector $\vec{b}$ on the original axes, we
+would find that, in fact, $
+    \vec{b} 
+    =
+    \begin{bmatrix}
+        0.8660 \hdots \\ 0.5
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        \cos 30^\circ \\
+        \sin 30^\circ
+    \end{bmatrix}
+$, which aligns with findings from the trigonometric model. \\
+
+Another invaluable benefit of this method is that we may also choose to rotate
+the axes about a different point to the origin, and observe the correct
+off-centric rotations for vectors without any changes to how the model is
+evaluated. Extrapolating this to three dimensions yields immeasurable savings in
+complexity and extra calculations which are expensive for computers to do. \\
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[x=2.5cm,y=2.5cm]
+        \coordinate (Origin) at (0, 0);
+        \coordinate (R) at (0.8660, 0.5);
+        \coordinate (P) at (1, 0);
+        \coordinate (R2) at (-0.707, 0.707);
+        \coordinate (P2) at (0, 1);
+
+        % Draw grid
+        \draw[gray!10, very thin, step=0.1] (-2, -2) grid (2, 2);
+        \draw[gray!50, very thin, step=1] (-2, -2) grid (2, 2);
+
+        \begin{scope}[cm={0.8660, 0.5, -0.707, 0.707,(0,0)}]
+            \draw[step=0.1, black!60!green!10, very thin, thin] (-2,-2) grid (2,2);
+            \draw[step=1, black!60!green!50, very thin, thin] (-2,-2) grid (2,2);
+            
+            \foreach \x in {-2, -1, 1, 2}
+                \draw (\x, 2pt) -- (\x, -2pt) node[black!60!green, below left, transform shape] {\small $\x$};
+            \foreach \y in {-2, -1, 1, 2}
+                \draw (2pt, \y) -- (-2pt, \y) node[black!60!green, below left, transform shape] {\small $\y$};
+
+            \draw[<->, black!60!green, thick] (-2, 0) -- (2, 0) node[right, transform shape] {$x'$};
+            \draw[<->, black!60!green, thick] (0, -2) -- (0, 2) node[above, transform shape] {$y'$};
+
+            % \node[circle, fill=black!60!green, inner sep=0pt, minimum size=5pt, transform shape] 
+            %     at (1, 0) {};
+            % \node[black!60!green, transform shape, above right] at (1, 0) {A'$(1, 0)$};
+            
+            % \node[circle, fill=black!60!green, inner sep=0pt, minimum size=5pt, transform shape] 
+            %     at (0, 1) {};
+            % \node[black!60!green, transform shape, above right] at (0, 1) {B'$(0, 1)$};
+        \end{scope}
+
+        % Draw tick marks on the axes
+        \foreach \x in {-2, -1, 1, 2}
+            \draw (\x, 2pt) -- (\x, -2pt) node[below left] {\small $\x$};
+        \foreach \y in {-2, -1, 1, 2}
+            \draw (2pt, \y) -- (-2pt, \y) node[below left] {\small $\y$};
+
+        \node[below left] at (0, 0) {$0$};
+        
+        % Draw Cartesian axes
+        \draw[<->, thick] (-2, 0) -- (2, 0) node[right] {$x$};
+        \draw[<->, thick] (0, -2) -- (0, 2) node[above] {$y$};
+
+        \pic[draw, angle radius=0.75cm, angle eccentricity=1.7, "$30$\textdegree"] {angle=P--Origin--R};
+        \pic[draw, angle radius=0.75cm, angle eccentricity=1.7, "$45$\textdegree"] {angle=P2--Origin--R2};
+
+        % \node[circle, fill, inner sep=0pt, minimum size=5pt] 
+        %     at (1, 0) {};
+        % \node[above right] at (1, 0) {A$(1, 0)$};
+        
+        % \node[circle, fill, inner sep=0pt, minimum size=5pt] 
+        %     at (0, 1) {};
+        % \node[above right] at (0, 1) {B$(0, 1)$};
+
+        % \draw[->, red, line width=0.6mm, >={stealth}] (0, 0) -- (P);
+        % \draw[->, black!60!green, line width=0.6mm, >={stealth}] (0, 0) -- (R);
+        
+        % \draw[->, red, line width=0.6mm, >={stealth}] (0, 0) -- (P2);
+        % \draw[->, black!60!green, line width=0.6mm, >={stealth}] (0, 0) -- (R2);
+    \end{tikzpicture}
+    \caption{ Overlay of new cartesian plane (green) with axes $x'$ and $y'$
+        rotated 30\textdegree\space anti-clockwise and 45\textdegree\space anti-clockwise respectively. }
+    \label{2d_axis_shear}
+\end{figure}
+
+Figure \ref{2d_axis_shear} depicts what is known as a "shear". It occurs when
+each axis is rotated by a different angle, and results in warping of the
+transformed vectors, evident by the asymmetric appearance of the graph. If you
+were interested in going beyond rotation, there is an opportunity to translate,
+dilate and shear the axes to achieve various effects like the one depicted.\\
+
+The elegance in this model comes from how we begin to compute one such
+transformation. \\
+
+The first step to this is determining the direction and dilation of the
+transformed axes by examining what happens to the vectors $\begin{bmatrix} 1 \\
+0 \end{bmatrix}$ and $\begin{bmatrix} 0 \\
+1 \end{bmatrix}$ after the transformation. If the magnitude of any one of these
+vectors changes, that means that the respective axis has been dilated by a
+factor of the magnitude. If the direction changes, that means that that axis has
+been rotated. By knowing the final position of these two vectors after a
+transformation, the transformation that took place can be reconstructed and
+applied to more points. \\    
+
+\pagebreak
+
+The extremely useful tool that bridges the gap between this theory of axis
+shifting and mathematics is called a transformation matrix. 2D Transformation
+matrices are constructed by taking the vectors found above and storing them in a
+single 2$\times$2 matrix:
+
+Let $\vec{x}$ be the post-transform position of $\begin{bmatrix} 1 \\ 0
+\end{bmatrix}$, where $\vec{x} = \begin{bmatrix} \vec{x}_x \\ \vec{x}_y
+\end{bmatrix}$, and let $\vec{y}$ be the post-transform position of
+$\begin{bmatrix} 0 \\ 1 \end{bmatrix}$, where $\vec{y} =
+\begin{bmatrix}\vec{y}_x \\ \vec{y}_y \end{bmatrix}$. The transformation matrix
+$M$ is described by $ M = \begin{bmatrix} \vec{x}_x & \vec{y}_x \\
+        \vec{x}_y & \vec{y}_y
+\end{bmatrix}$.\\
+
+The transformation $T_M(\vec{v})$ of $\vec{v}$ by matrix $M$ can then be
+described as
+
+\begin{align*}
+    T_M(\vec{v}) = M\vec{v} = \begin{bmatrix} 
+        \vec{x}_x & \vec{y}_x \\
+        \vec{x}_y & \vec{y}_y
+    \end{bmatrix}
+    \begin{bmatrix}
+        \vec{v}_x \\
+        \vec{v}_y
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        \vec{x}_x\vec{v}_x + \vec{y}_x\vec{v}_y \\
+        \vec{x}_y\vec{v}_x + \vec{y}_y\vec{v}_y
+    \end{bmatrix}
+\end{align*}
+
+If $\vec{x}$ and $\vec{y}$ do not change after a transformation, they would be
+equal to $\begin{bmatrix} 1 \\ 0 \end{bmatrix}$ and $\begin{bmatrix} 0 \\ 1
+\end{bmatrix}$ respectively. From this, a transformation matrix which does nothing
+(called the "identity") $M_0$ can be constructed in the form of
+$
+M_0 = \begin{bmatrix} 
+    1 & 0 \\
+    0 & 1
+\end{bmatrix}
+$. In this case, $T_{M_0}(\vec{v}) = \begin{bmatrix}
+    (1)\vec{v}_x + (0)\vec{v}_y \\
+    (0)\vec{v}_x + (1)\vec{v}_y
+\end{bmatrix} = \begin{bmatrix}
+    \vec{v}_x\\
+    \vec{v}_y
+\end{bmatrix} = \vec{v}$\\
+
 \subsection{Object \& world axes}
 Any object transformation can be represented by where its three axes "end up"
 after the transformation. The direction of each axis is represented as a 3D

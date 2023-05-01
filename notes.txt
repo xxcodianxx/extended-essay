@@ -16,7 +16,7 @@ running commentary on math
 
 more explicit matrix multiplication
 
-example alpha gamme gimball lock
+example alpha gamme gimball lock <--- explain what the gimbal lock proof shows
 
 don't define 2 pages ago eg. world axes
 
