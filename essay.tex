@@ -5,7 +5,8 @@
     amsthm, lipsum, 
     physics, mathtools, setspace,
     array, caption, float,
-    tikz, tikz-3dplot, multicol
+    tikz, tikz-3dplot, multicol,
+    stackengine, enumitem
 }
 
 \usepackage[hmarginratio=1:1, margin=0.5in, includeheadfoot]{geometry}
@@ -13,6 +14,7 @@
 \graphicspath{ {./res/} }
 \usetikzlibrary{decorations.markings}
 \usetikzlibrary{angles, quotes}
+\newcommand{\neswarrow}{\ensurestackMath{\stackengine{0pt}{\nearrow}{\swarrow}{O}{c}{F}{F}{L}}}
 
 % \doublespacing 
 
@@ -20,7 +22,7 @@
 % \pagecolor[rgb]{0.128,0.128,0.128}
 % \color[rgb]{1,1,1}
 
-\title{\vspace{-3cm}Applications of Quaternions in 3D Rotation}
+\title{\vspace{-1.5cm}Applications of Quaternions in 3D Rotation}
 \author{Martin Velikov}
 \date{To what extent can quaternions supersede rotation matrices constructed from Euler
     angles in representing 3D rotation?}
@@ -55,6 +57,8 @@ order to draw conclusions about the usefulness and applicability of Quaternions
 in 3D computer graphics and scientific simulations compared to rotation matrices
 constructed from Euler angles.
 
+\pagebreak
+
 \section{Rotation Matrices}
 Rotation matrices are considered one of the most versatile ways of doing 3D
 rotation. They are often used in computer animation and praised for their
@@ -65,10 +69,12 @@ describes a 3D rotation.
 \subsection{In two dimensions}
 It is worthwile conceptually exploring what happens in two dimensions first, as
 this will introduce valuable concepts which will help with understanding how
-three dimensional matrices work. \\
+three dimensional rotation matrices work. \\
+
+\subsubsection{Intuition}
 
 Let 2D points be represented as a vector of the form $\vec{v} = \begin{bmatrix}x
-\\ y \end{bmatrix}$ where $x$ and $y$ represent the x and y coordinates of the
+        \\ y\end{bmatrix}$ where $x$ and $y$ represent the x and y coordinates of the
 point respective to the origin. \\
 
 By representing the points as vectors, rotation of a point around the origin
@@ -87,29 +93,29 @@ would be equrivalent to rotating the vector. Consider the rotation of point (1,
         \draw[gray!50, very thin, step=1] (-2, -2) grid (2, 2);
 
         \draw[gray!50, dashed] (0, 0) circle (1);
-        
+
         % Draw tick marks on the axes
         \foreach \x in {-2, -1, 1, 2}
-            \draw (\x, 2pt) -- (\x, -2pt) node[below] {\small $\x$};
+        \draw (\x, 2pt) -- (\x, -2pt) node[below] {\small $\x$};
         \foreach \y in {-2, -1, 1, 2}
-            \draw (2pt, \y) -- (-2pt, \y) node[left] {\small $\y$};
+        \draw (2pt, \y) -- (-2pt, \y) node[left] {\small $\y$};
 
         \node[below left] at (0, 0) {$0$};
-        
+
         % Draw Cartesian axes
         \draw[<->, thick] (-2, 0) -- (2, 0) node[right] {$x$};
         \draw[<->, thick] (0, -2) -- (0, 2) node[above] {$y$};
 
         \pic[draw, angle radius=0.75cm, angle eccentricity=1.7, "$45$\textdegree"] {angle=P--Origin--R};
-        
+
         % Draw red vector arrow [1, 0]
         \draw[->, red, line width=0.6mm, >={stealth}] (0, 0) -- (P) node[midway, below right] {$\begin{bmatrix}1 \\ 0\end{bmatrix}$};
-    
+
         % Draw blue vector arrow [0.7071, 0.7071]
-        \draw[->, blue, line width=0.6mm, >={stealth}] (0, 0) -- (R) node[above right] 
+        \draw[->, blue, line width=0.6mm, >={stealth}] (0, 0) -- (R) node[above right]
             {$\begin{bmatrix}0.7071 \\ 0.7071\end{bmatrix}$};
 
-        \draw[->, black!60!green, line width=0.6mm, >={stealth}] (0, 0) -- (-0.7, 1.2) node[above] 
+        \draw[->, black!60!green, line width=0.6mm, >={stealth}] (0, 0) -- (-0.7, 1.2) node[above]
             {$\begin{bmatrix}? \\ ?\end{bmatrix}$};
 
     \end{tikzpicture}
@@ -121,7 +127,7 @@ would be equrivalent to rotating the vector. Consider the rotation of point (1,
 From Figure \ref{2d_rot}, it may seem like calculating this rotation is trivial
 by using the trigonometric functions: for any angle $\theta$, the rotation of
 $\begin{bmatrix}1 \\ 0\end{bmatrix}$ is equal to $\begin{bmatrix}\cos\theta \\
-\sin\theta\end{bmatrix}$. \vspace{0.2cm}
+        \sin\theta\end{bmatrix}$. \vspace{0.2cm}
 
 Indeed, this is the case for the simple example above, but the applicability of
 this model quickly breaks down once we increase the complexity. For example,
@@ -148,11 +154,11 @@ transform the axes themselves. \\
         \rotatebox{30}{
             \draw[step=0.1, blue!10, very thin, thin] (-2,-2) grid (2,2);
             \draw[step=1, blue!50, very thin, thin] (-2,-2) grid (2,2);
-            
+
             \foreach \x in {-2, -1, 1, 2}
-                \draw (\x, 2pt) -- (\x, -2pt) node[blue, below left] {\small $\x$};
+            \draw (\x, 2pt) -- (\x, -2pt) node[blue, below left] {\small $\x$};
             \foreach \y in {-2, -1, 1, 2}
-                \draw (2pt, \y) -- (-2pt, \y) node[blue, below left] {\small $\y$};
+            \draw (2pt, \y) -- (-2pt, \y) node[blue, below left] {\small $\y$};
 
             \draw[<->, blue, thick] (-2, 0) -- (2, 0) node[right] {$x'$};
             \draw[<->, blue, thick] (0, -2) -- (0, 2) node[above] {$y'$};
@@ -162,21 +168,21 @@ transform the axes themselves. \\
 
         % Draw tick marks on the axes
         \foreach \x in {-2, -1, 1, 2}
-            \draw (\x, 2pt) -- (\x, -2pt) node[below left] {\small $\x$};
+        \draw (\x, 2pt) -- (\x, -2pt) node[below left] {\small $\x$};
         \foreach \y in {-2, -1, 1, 2}
-            \draw (2pt, \y) -- (-2pt, \y) node[below left] {\small $\y$};
+        \draw (2pt, \y) -- (-2pt, \y) node[below left] {\small $\y$};
 
         \node[below left] at (0, 0) {$0$};
-        
+
         % Draw Cartesian axes
         \draw[<->, thick] (-2, 0) -- (2, 0) node[right] {$x$};
         \draw[<->, thick] (0, -2) -- (0, 2) node[above] {$y$};
 
         \pic[draw, angle radius=0.75cm, angle eccentricity=1.7, "$30$\textdegree"] {angle=P--Origin--R};
-        
+
         % Draw red vector arrow [1, 0]
         \draw[->, red, line width=1mm, >={stealth}] (0, 0) -- (P);
-    
+
         % Draw blue vector arrow [0.7071, 0.7071]
         \draw[->, blue, line width=1mm, >={stealth}] (0, 0) -- (R);
     \end{tikzpicture}
@@ -192,9 +198,9 @@ are identical to the red vector's coordinates on the original - both are
 $\begin{bmatrix}1 \\ 0\end{bmatrix}$. In fact, we find that any one point on our
 original axis has a counterpart on the rotated axis which corresponds to the
 rotation of that point about the origin by $30$\textdegree. If we were to
-examine the coordinates of the blue vector $\vec{b}$ on the original axes, we
+examine the coordinates of the blue vector $b$ on the original axes, we
 would find that, in fact, $
-    \vec{b} 
+    \vec{b}
     =
     \begin{bmatrix}
         0.8660 \hdots \\ 0.5
@@ -228,11 +234,11 @@ complexity and extra calculations which are expensive for computers to do. \\
         \begin{scope}[cm={0.8660, 0.5, -0.707, 0.707,(0,0)}]
             \draw[step=0.1, black!60!green!10, very thin, thin] (-2,-2) grid (2,2);
             \draw[step=1, black!60!green!50, very thin, thin] (-2,-2) grid (2,2);
-            
+
             \foreach \x in {-2, -1, 1, 2}
-                \draw (\x, 2pt) -- (\x, -2pt) node[black!60!green, below left, transform shape] {\small $\x$};
+            \draw (\x, 2pt) -- (\x, -2pt) node[black!60!green, below left, transform shape] {\small $\x$};
             \foreach \y in {-2, -1, 1, 2}
-                \draw (2pt, \y) -- (-2pt, \y) node[black!60!green, below left, transform shape] {\small $\y$};
+            \draw (2pt, \y) -- (-2pt, \y) node[black!60!green, below left, transform shape] {\small $\y$};
 
             \draw[<->, black!60!green, thick] (-2, 0) -- (2, 0) node[right, transform shape] {$x'$};
             \draw[<->, black!60!green, thick] (0, -2) -- (0, 2) node[above, transform shape] {$y'$};
@@ -240,7 +246,7 @@ complexity and extra calculations which are expensive for computers to do. \\
             % \node[circle, fill=black!60!green, inner sep=0pt, minimum size=5pt, transform shape] 
             %     at (1, 0) {};
             % \node[black!60!green, transform shape, above right] at (1, 0) {A'$(1, 0)$};
-            
+
             % \node[circle, fill=black!60!green, inner sep=0pt, minimum size=5pt, transform shape] 
             %     at (0, 1) {};
             % \node[black!60!green, transform shape, above right] at (0, 1) {B'$(0, 1)$};
@@ -248,12 +254,12 @@ complexity and extra calculations which are expensive for computers to do. \\
 
         % Draw tick marks on the axes
         \foreach \x in {-2, -1, 1, 2}
-            \draw (\x, 2pt) -- (\x, -2pt) node[below left] {\small $\x$};
+        \draw (\x, 2pt) -- (\x, -2pt) node[below left] {\small $\x$};
         \foreach \y in {-2, -1, 1, 2}
-            \draw (2pt, \y) -- (-2pt, \y) node[below left] {\small $\y$};
+        \draw (2pt, \y) -- (-2pt, \y) node[below left] {\small $\y$};
 
         \node[below left] at (0, 0) {$0$};
-        
+
         % Draw Cartesian axes
         \draw[<->, thick] (-2, 0) -- (2, 0) node[right] {$x$};
         \draw[<->, thick] (0, -2) -- (0, 2) node[above] {$y$};
@@ -264,14 +270,14 @@ complexity and extra calculations which are expensive for computers to do. \\
         % \node[circle, fill, inner sep=0pt, minimum size=5pt] 
         %     at (1, 0) {};
         % \node[above right] at (1, 0) {A$(1, 0)$};
-        
+
         % \node[circle, fill, inner sep=0pt, minimum size=5pt] 
         %     at (0, 1) {};
         % \node[above right] at (0, 1) {B$(0, 1)$};
 
         % \draw[->, red, line width=0.6mm, >={stealth}] (0, 0) -- (P);
         % \draw[->, black!60!green, line width=0.6mm, >={stealth}] (0, 0) -- (R);
-        
+
         % \draw[->, red, line width=0.6mm, >={stealth}] (0, 0) -- (P2);
         % \draw[->, black!60!green, line width=0.6mm, >={stealth}] (0, 0) -- (R2);
     \end{tikzpicture}
@@ -291,13 +297,13 @@ transformation. \\
 
 The first step to this is determining the direction and dilation of the
 transformed axes by examining what happens to the vectors $\begin{bmatrix} 1 \\
-0 \end{bmatrix}$ and $\begin{bmatrix} 0 \\
-1 \end{bmatrix}$ after the transformation. If the magnitude of any one of these
+        0\end{bmatrix}$ and $\begin{bmatrix} 0 \\
+        1\end{bmatrix}$ after the transformation. If the magnitude of any one of these
 vectors changes, that means that the respective axis has been dilated by a
 factor of the magnitude. If the direction changes, that means that that axis has
 been rotated. By knowing the final position of these two vectors after a
 transformation, the transformation that took place can be reconstructed and
-applied to more points. \\    
+applied to more points. \\
 
 \pagebreak
 
@@ -306,140 +312,212 @@ shifting and mathematics is called a transformation matrix. 2D Transformation
 matrices are constructed by taking the vectors found above and storing them in a
 single 2$\times$2 matrix:
 
-Let $\vec{x}$ be the post-transform position of $\begin{bmatrix} 1 \\ 0
-\end{bmatrix}$, where $\vec{x} = \begin{bmatrix} \vec{x}_x \\ \vec{x}_y
-\end{bmatrix}$, and let $\vec{y}$ be the post-transform position of
+Let $x$ be the post-transform position of $\begin{bmatrix} 1 \\ 0
+    \end{bmatrix}$, where $\vec{x} = \begin{bmatrix} x_x \\ x_y
+    \end{bmatrix}$, and let $y$ be the post-transform position of
 $\begin{bmatrix} 0 \\ 1 \end{bmatrix}$, where $\vec{y} =
-\begin{bmatrix}\vec{y}_x \\ \vec{y}_y \end{bmatrix}$. The transformation matrix
-$M$ is described by $ M = \begin{bmatrix} \vec{x}_x & \vec{y}_x \\
-        \vec{x}_y & \vec{y}_y
-\end{bmatrix}$.\\
+    \begin{bmatrix}y_x \\ y_y \end{bmatrix}$. The transformation matrix
+$M$ is described by $ M = \begin{bmatrix} x_x & y_x \\
+                x_y & y_y
+    \end{bmatrix}$.\\
 
 The transformation $T_M(\vec{v})$ of $\vec{v}$ by matrix $M$ can then be
 described as
 
 \begin{align*}
-    T_M(\vec{v}) = M\vec{v} = \begin{bmatrix} 
-        \vec{x}_x & \vec{y}_x \\
-        \vec{x}_y & \vec{y}_y
+    T_M(\vec{v}) = M\vec{v} = 
+    \begin{bmatrix}
+        x_x & y_x \\
+        x_y & y_y
     \end{bmatrix}
     \begin{bmatrix}
-        \vec{v}_x \\
-        \vec{v}_y
+        v_x \\
+        v_y
     \end{bmatrix}
     =
     \begin{bmatrix}
-        \vec{x}_x\vec{v}_x + \vec{y}_x\vec{v}_y \\
-        \vec{x}_y\vec{v}_x + \vec{y}_y\vec{v}_y
+        x_xv_x + y_xv_y \\
+        x_yv_x + y_yv_y
     \end{bmatrix}
 \end{align*}
 
 If $\vec{x}$ and $\vec{y}$ do not change after a transformation, they would be
 equal to $\begin{bmatrix} 1 \\ 0 \end{bmatrix}$ and $\begin{bmatrix} 0 \\ 1
-\end{bmatrix}$ respectively. From this, a transformation matrix which does nothing
+    \end{bmatrix}$ respectively. From this, a transformation matrix which does nothing
 (called the "identity") $M_0$ can be constructed in the form of
 $
-M_0 = \begin{bmatrix} 
-    1 & 0 \\
-    0 & 1
-\end{bmatrix}
+    M_0 = \begin{bmatrix}
+        1 & 0 \\
+        0 & 1
+    \end{bmatrix}
 $. In this case, $T_{M_0}(\vec{v}) = \begin{bmatrix}
-    (1)\vec{v}_x + (0)\vec{v}_y \\
-    (0)\vec{v}_x + (1)\vec{v}_y
-\end{bmatrix} = \begin{bmatrix}
-    \vec{v}_x\\
-    \vec{v}_y
-\end{bmatrix} = \vec{v}$\\
+        (1)v_x + (0)v_y \\
+        (0)v_x + (1)v_y
+    \end{bmatrix} = \begin{bmatrix}
+        v_x \\
+        v_y
+    \end{bmatrix} = \vec{v}$ \\\\
 
-\subsection{Object \& world axes}
-Any object transformation can be represented by where its three axes "end up"
-after the transformation. The direction of each axis is represented as a 3D
-vector of norm one, which "points" in the desired direction. However, the
-meaning of the "object's axes" is ambigous here. It is important to make the
-distinction between the "world axes" which represent the axes of the surrounding
-3D scene, and the "object axes", which describe it in its own space, as if it
-were the only object in a scene. The useful property of this abstraction is that
-the object axes do not necessary have to be oriented the same as the world axes,
-and this can be leveraged for transformation. \\
-
-The three object X,Y,Z axes can be represented by the vectors
-$\vec{x}$, $\vec{y}$, $\vec{z}$: \\
+If we consider the point $\begin{bmatrix} 1 \\ 0 \end{bmatrix}$ on the unit
+circle, a rotation by $\theta$ would be represented as $\begin{bmatrix}
+        \cos\theta \\ \sin\theta \end{bmatrix}$. Likewise, the rotation of the point
+$\begin{bmatrix} 0 \\ 1 \end{bmatrix}$ is equrivalent to $\begin{bmatrix}
+        -\sin\theta \\ \cos\theta \end{bmatrix}$. Hence, a 2D transformation matrix
+$R(\theta)$ can be constructed so that it rotates the axis by any angle
+$\theta$. This is what is known as a rotation matrix.
 
 \begin{align*}
-    \vec{x} = \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix}
+    R(\theta) & = \begin{bmatrix}
+                      \cos\theta & -\sin\theta \\
+                      \sin\theta & \cos\theta
+                  \end{bmatrix}
+\end{align*}
+
+You can combine different linear transformations by multiplying a vector by
+multiple transformation matrices. For example, you might choose to apply a shear
+or a scale to your points before rotating them. This property applies to both
+two and three dimensional transformation matrices. Because of this versatility, transformation matrices
+are very easy to work with and integrate into more complex operations.
+
+\subsection{In three dimensions}
+
+Now that we have established basic intuition on what 2D matrices actually do, we
+can extend the established observations to three dimensions. \\
+
+In 3D, there are now three axes which must be kept track of:
+\begin{itemize}[leftmargin=2cm]
+    \item X (left $\leftrightarrow$ right)
+    \item Y (up $\updownarrow$ down)
+    \item Z (forward $\neswarrow$ back)
+\end{itemize}
+
+The identity vectors $\vec{x_0}$, $\vec{y_0}$ and $\vec{z_0}$ in three
+dimensions, like we saw with 2D, have a magnitude of $1$ and lie on the axis
+they represent.
+
+\begin{align*}
+    \vec{x_0} = \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix}
     \quad
-    \vec{y} = \begin{bmatrix} 0 \\ 1 \\ 0 \end{bmatrix}
+    \vec{y_0} = \begin{bmatrix} 0 \\ 1 \\ 0 \end{bmatrix}
     \quad
-    \vec{z} = \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix}
+    \vec{z_0} = \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix}
 \end{align*} \\
 
-This orientation of the axes is called the "identity". It describes a space
-where all three axes are perpendicular, and are aligned with the world axes.
-
-\subsection{Rotating points}
-\label{rotating_points}
-
-Whenever a point $\vec{p}$ has to be rotated, its X,Y and Z components ($p_x$,
-$p_y$ and $p_z$ respectively) can be multiplied by their respective object axis.
+The 3D transformation defines the transition from the identity vectors into ones
+($\vec{x}$, $\vec{y}$ and $\vec{z}$) with potentially different magnitude and
+direction, signifying reoriented axes.
 
 \begin{align*}
-    \vec{a} = \vec{x}p_x
+    \vec{x} = \begin{bmatrix}
+                  {x}_x \\ {y}_x \\ {z}_x
+              \end{bmatrix}
     \quad
-    \vec{b} = \vec{y}p_y
+    \vec{y} = \begin{bmatrix}
+                  {x}_y \\ {y}_y \\ {z}_y
+              \end{bmatrix}
     \quad
-    \vec{c} = \vec{z}p_z
-    \quad
+    \vec{z} = \begin{bmatrix}
+                  {x}_z \\ {y}_z \\ {z}_z
+              \end{bmatrix}
 \end{align*}
 
-The resulting vectors are then added together for the final position of
-the transformed point $\vec{r}$.
+Changing the magnitude and/or direction of these vectors results in various effects
+on the 3D space, similar to how this works in two dimensions. Individually
+changing any one or two of these vectors results in the three dimensional
+equrivalent of shear called "deformation". This property is often used in 3D
+animation to compress or stretch objects -- a bouncing ball, for example. \\
 
-\begin{align*}
-    \vec{r} = \vec{a} + \vec{b} + \vec{c}
-\end{align*}
-
-\subsubsection{3$\times$3 Matrix form}
-The process of transforming $\vec{p} \rightarrow \vec{r}$ is highly reminiscent of matrix
-multiplication. It is useful to represent $\vec{x}$, $\vec{y}$, $\vec{z}$ as a
-single 3$\times$3 matrix of their components $M$ of the form
+As before, constructing a matrix out of these vectors allows us to leverage
+matrix multiplication to transform points. A 3$\times$3 matrix $M$ can now be
+constructed to represent a 3D transformation using the above axes. Let the
+identity of $M$ be $M_0$.
 
 \begin{align*}
     M = \begin{bmatrix}
-            {\vec{x}}_x & {\vec{y}}_x & {\vec{z}}_x \\
-            {\vec{x}}_y & {\vec{y}}_y & {\vec{z}}_y \\
-            {\vec{x}}_z & {\vec{y}}_z & {\vec{z}}_z
-        \end{bmatrix}
+            {x}_x & {y}_x & {z}_x \\
+            {x}_y & {y}_y & {z}_y \\
+            {x}_z & {y}_z & {z}_z
+        \end{bmatrix} \quad\therefore\quad M_0 = \begin{bmatrix}
+                                                     1 & 0 & 0 \\
+                                                     0 & 1 & 0 \\
+                                                     0 & 0 & 1
+                                                 \end{bmatrix}
 \end{align*}
 
-The transformation of $\vec{p}$ to $\vec{r}$ can then be described by $M\vec{p}$
-because of the properties of matrix multiplication, in that
+For a transformation $T_M(\vec{v})$ on $\vec{v} = \begin{bmatrix}
+        v_x \\
+        v_y \\
+        v_z \end{bmatrix}$ by matrix $M$,
 
 \begin{align*}
-    M\vec{p} = \vec{M_1}p_x + \vec{M_2}p_y + \vec{M_3}p_z
-    \quad \text{where $M_n$ represents the $n$th column of $M$.}
+    T_M(\vec{v}) = M\vec{v} = \begin{bmatrix}
+                                  {x}_x & {y}_x & {z}_x \\
+                                  {x}_y & {y}_y & {z}_y \\
+                                  {x}_z & {y}_z & {z}_z
+                              \end{bmatrix}
+    \begin{bmatrix}
+        v_x \\
+        v_y \\
+        v_z
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        x_x v_x + y_x v_y + z_x v_y \\
+        x_y v_x + y_y v_y + z_y v_y \\
+        x_z v_x + y_z v_y + z_z v_y \\
+    \end{bmatrix}
 \end{align*}
 
-Since the columns $\vec{M_1}$, $\vec{M_2}$, $\vec{M_3}$ correspond to the object
-axes X, Y and Z respectively, this is equrivalent to the rotation equation shown
-in Section \ref{rotating_points}. \\
-
-In this form, the identity axes are represented by the matrix $I = \begin{bmatrix}
-    1 & 0 & 0 \\
-    0 & 1 & 0 \\
-    0 & 0 & 1
-\end{bmatrix}$.
-
-% \begin{align*}
-    
-% \end{align*}
+In our case, we seek to perform a rotation on a set of 3D points, meaning that
+we would need a form for a 3D rotation matrix. Like observed in the 2D case, a
+rotation could affect more than one axis, and so it is important to consider the
+matrix as a whole. Historically, many different ways of constructing rotation
+matrices have been shown, each with their benefits and downsides. In a sense,
+rotation matrices are not an entirely independent method of performing rotation,
+but are rather an underlying infrastructure for other methods to use.
 
 \subsection{Construction from Euler angles}
 
 \subsubsection{Concept}
 In real life, it is practical to represent rotations with easily measurable
 metrics, like angles. Aircraft and watercraft make extensive use of yaw, pitch
-and roll angles in instrumentation to aid their pilots in judging the orientation
-of the craft. \\
+and roll angles in instrumentation to aid their pilots in judging the
+orientation of the craft. Yaw indicates a horizontal swivel, or a "heading",
+pitch indicates the angle of the nose relative to the horizon, and roll
+indicates how much the plane is turned about the forward axis. \\
+
+\begin{figure}[H]
+    \centering
+    \tdplotsetmaincoords{70}{-45}
+    \begin{tikzpicture}[x=0.5cm,y=0.5cm,z=0.3cm,>=stealth,tdplot_main_coords]
+        \coordinate (X) at (3,0,0);
+        \coordinate (Y) at (0,3,0);
+        \coordinate (Z) at (0,0,3);
+
+        \draw[->, black!60!red] (0,0,0) -- (X) node[right] {$x$};
+        \draw[->, black!60!blue] (0,0,0) -- (Y) node[left] {$y$};
+        \draw[->, black!60!green] (0,0,0) -- (Z) node[above] {$z$};
+
+        \node[red] at (2.25,0,0.8) {$pitch$};
+        \begin{scope}[canvas is zy plane at x=2.5]
+            \draw[red, dashed] (0,0) circle (0.3);
+        \end{scope}
+
+        \node[black!30!green] at (1,0,2.25) {$yaw$};
+        \begin{scope}[canvas is xy plane at z=2.5]
+            \draw[black!30!green, dashed] (0,0) circle (0.3);
+        \end{scope}
+
+        \node[blue] at (0.1,2.25,0.6) {$roll$};
+        \begin{scope}[canvas is xz plane at y=2]
+            \draw[blue, dashed] (0,0) circle (0.3);
+        \end{scope}
+
+
+    \end{tikzpicture}
+    \caption{Yaw pitch and roll}
+    \label{yawpitchroll}
+\end{figure}
 
 Euler angles are based around this concept. A set of Euler angles is a 3D vector
 containing the yaw, pitch and roll of an object from a reference frame. In the
@@ -613,13 +691,13 @@ $\alpha$, $\beta$ and $\gamma$, where $\beta=\frac{\pi}{2}$
 \end{align*} \\
 
 Notice how in the above matrix, changing the value of both $\alpha$ and $\gamma$
-would result in a rotation around the world Z-axis as 
+would result in a rotation around the world Z-axis as
 
 \begin{align*}
     R_1 = \begin{bmatrix} 0  \\
-        0  \\
-        -1 \\
-    \end{bmatrix}
+              0  \\
+              -1 \\
+          \end{bmatrix}
 \end{align*} \\
 
 Hence, one degree of freedom is lost here - it is not possible to rotate the
@@ -637,7 +715,7 @@ In the Apollo 11 mission, (talk about gimball lock)
 
 \section{Quaternions}
 \subsection{Axis-angle}
-Another interesting way to represent the rotation of an object 
+Another interesting way to represent the rotation of an object
 
 \subsection{Standard Form}
 Quaternions, like complex numbers, are defined with "real" and "imaginary"
