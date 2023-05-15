@@ -1,6 +1,7 @@
 \documentclass[12pt, a4paper]{article}
 \usepackage[utf8]{inputenc}
-\usepackage{ 
+\usepackage[hyphens]{url}
+\usepackage{
     amsmath, amssymb, amsfonts, 
     amsthm, lipsum, 
     physics, mathtools, setspace,
@@ -21,45 +22,48 @@
 \usepackage{xcolor}
 % \pagecolor[rgb]{0.128,0.128,0.128}
 % \color[rgb]{1,1,1}
-
-\title{\vspace{-1.5cm}Applications of Quaternions in 3D Rotation}
+\title{\vspace{-2cm}Applications of Quaternions in 3D Rotation}
 \author{Martin Velikov}
 \date{To what extent can quaternions supersede rotation matrices constructed from Euler
     angles in representing 3D rotation?}
 
 \begin{document}
-
 \maketitle
 \tableofcontents
 
 \pagebreak
 
 \section{Introduction}
-Historically, mathematicians have endeavoured to describe the world around us
-using mathematics. While mathematicians often create simplifications or models
-in lower dimensions, as is the case with fields of mathematics like trigonometry
+Historically, mathematicians have endeavoured to describe the real world around
+us using mathematics. While mathematicians often create simplifications or
+models in lower dimensions, as is the case with disciplines like trigonometry
 and complex numbers, we are ultimately inhabitants of a three dimensional world.
 In the modern day, demand for working in three dimensions is ever increasing,
-with scientific applications in aerodynamic modeling, astrophysics, weather
-modelling and computational chemistry, in addition to numerous uses in computer
-generated imagery (CGI). In all of these use cases, there is a need for a
-rigorous mathematical framework to represent and manipulate the 3D world. \\
+with scientific applications in aerodynamic modeling, astrophysics, robotics and
+computational chemistry, in addition to numerous uses in computer generated
+imagery (CGI). In all of these use cases, there is a need for a rigorous
+mathematical framework to represent and manipulate the 3D world. \\
 
 One of the intuitively simplest, but surprisingly complex aspects of
 transitioning from a two dimensional space to three dimensional is the problem
 of rotation. Indeed, there currently exist several competing mathematical models
 for 3D rotation in common use which bear their own strengths and weaknesses. Of
 these, some of the most commonly seen constructs are 3D "rotation matrices",
-which are usually constructed from "Euler angles", and Quaternions.\\
+which are usually constructed from "Euler angles", and Quaternions (Huynh, 2009).\\
 
 This investigation aims to compare and contrast these methods of rotation in
 order to draw conclusions about the usefulness and applicability of Quaternions
-in 3D computer graphics and scientific simulations compared to rotation matrices
+in 3D computer graphics and scientific simulations, compared to rotation matrices
 constructed from Euler angles. \\
 
 As an aspiring computer animator and game developer, this question is of real
 significance to me as it will prove to be invaluable experience in the
-underlying concepts of my field of work. 
+underlying concepts of my future field of work. In the near future, the
+understanding of rotation methods I have gained from this essay will allow me to
+apply them to game prototypes I create. Hence, in order to build intuition for
+myself, nearly all of the formulas and proofs in this essay are of my own
+independent derivation, with some external sources used for inspiration and
+guidance. \\
 
 \pagebreak
 
@@ -75,9 +79,9 @@ It is worthwile conceptually exploring what happens in two dimensions first, as
 this will introduce valuable concepts which will help with understanding how
 three dimensional rotation matrices work. \\
 
-Let 2D points be represented as a vector of the form $\vec{v} = \begin{bmatrix}x
-        \\ y\end{bmatrix}$ where $x$ and $y$ represent the x and y coordinates of the
-point respective to the origin. \\
+Let 2D points be represented as a point vector of the form $\vec{v} =
+        \begin{bmatrix}x \\ y\end{bmatrix}$ where $x$ and $y$ represent the x
+        and y coordinates of the point respective to the origin. \\
 
 By representing the points as vectors, rotation of a point around the origin
 would be equrivalent to rotating the vector. Consider the rotation of point (1,
@@ -126,16 +130,16 @@ would be equrivalent to rotating the vector. Consider the rotation of point (1,
     \label{2d_rot}
 \end{figure}
 
-From Figure \ref{2d_rot}, it may seem like calculating this rotation is trivial
-by using the trigonometric functions: for any angle $\theta$, the rotation of
+From Figure \ref{2d_rot}, it may seem like calculating 2D rotation is trivial by
+using the trigonometric functions: for any angle $\theta$, the rotation of
 $\begin{bmatrix}1 \\ 0\end{bmatrix}$ is equal to $\begin{bmatrix}\cos\theta \\
         \sin\theta\end{bmatrix}$. \vspace{0.2cm}
 
-Indeed, this is the case for the simple example above, but the applicability of
-this model quickly breaks down once the complexity is increased. For example,
-rotating the green vector about a point different to the origin by using this
-model is difficult to imagine. Furthermore, if one was to go beyond rotation,
-how could the red vector be transformed into the green vector? \\
+Indeed, this is the case for the simple example of a 2D unit vector above, but
+the applicability of using simple trigonometric functions for rotation quickly
+breaks down once the complexity of the problem is increased. For example, if we
+wished to rotate a non-unit vector to the point where it is colinear with
+another, or wished to apply multiple rotations one after the other. \\
 
 Linear transformation using matrices elegantly deals with these problems by
 introducing one concept - instead of transforming each individual vector,
@@ -198,10 +202,11 @@ transform the axes themselves. \\
 
 In Figure \ref{2d_axis_rot}, the blue vector's coordinates on the rotated axes
 are identical to the red vector's coordinates on the original - both are
-$\begin{bmatrix}1 \\ 0\end{bmatrix}$. In fact, any one point on the original
-axis has a counterpart on the rotated axis which corresponds to the rotation of
-that point about the origin by $30$\textdegree. If one examines the coordinates
-of the blue vector $b$ on the original axes, it becomes evident that
+$\begin{bmatrix}1 \\ 0\end{bmatrix}$ in their respective axes. In fact, any one
+point on the original axis has a counterpart on the rotated axis which
+corresponds to the rotation of that point about the origin by $30$\textdegree.
+If one examines the coordinates of the blue vector $b$ on the original axes, it
+becomes evident that
 $
     \vec{b}
     =
@@ -361,9 +366,9 @@ Considering the point $\begin{bmatrix} 1 \\ 0 \end{bmatrix}$ on a unit circle,
 a rotation by $\theta$ would be represented as $\begin{bmatrix} \cos\theta \\
 \sin\theta \end{bmatrix}$. Likewise, the rotation of the point $\begin{bmatrix}
 0 \\ 1 \end{bmatrix}$ is equrivalent to $\begin{bmatrix} -\sin\theta \\
-\cos\theta \end{bmatrix}$. Hence, a 2D transformation matrix $R(\theta)$ can be
-constructed so that it rotates the 2D axes by any angle $\theta$. This is what is
-known as a rotation matrix.
+\cos\theta \end{bmatrix}$. Hence, a general 2D transformation matrix $R(\theta)$
+can be constructed so that it rotates the 2D axes by any angle $\theta$. This is
+what is known as a rotation matrix.
 
 \begin{align*}
     R(\theta) & = \begin{bmatrix}
@@ -378,7 +383,7 @@ multiple transformation matrices sequentially. For example, you might choose to
 apply a shear or a scale to your points before rotating them. This property
 applies to both two and three dimensional transformation matrices. Because of
 this versatility, transformation matrices are very easy to work with and
-integrate into more complex operations. \\
+integrate into more complex application. \\
 
 It is important to note that matrix multiplication is not commutative, and hence
 it is important to always multiply matrices in a right-to-left order: if one
@@ -393,8 +398,8 @@ can extend the established observations to three dimensions. \\
 In 3D, there are now three axes which must be kept track of:
 \begin{itemize}[leftmargin=2cm]
     \item X (left $\leftrightarrow$ right)
-    \item Y (up $\updownarrow$ down)
-    \item Z (forward $\neswarrow$ back)
+    \item Y (forward $\neswarrow$ back)
+    \item Z (up $\updownarrow$ down)
 \end{itemize}
 
 The identity vectors $\vec{x}_0$, $\vec{y}_0$ and $\vec{z}_0$ in three
@@ -409,7 +414,7 @@ they represent.
     \vec{z}_0 = \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix}
 \end{align*} \\
 
-The 3D transformation defines the transition from the identity vectors into ones
+A 3D transformation defines the transition from the identity vectors into ones
 ($\vec{x}$, $\vec{y}$ and $\vec{z}$) with potentially different magnitude and
 direction, signifying reoriented axes.
 
@@ -435,8 +440,8 @@ animation to compress or stretch objects -- a bouncing ball, for example. \\
 
 As before, constructing a matrix out of these vectors allows us to leverage
 matrix multiplication to transform points. A 3$\times$3 matrix $M$ can now be
-constructed to represent a 3D transformation using the above axes. Let the
-identity of $M$ be $M_0$.
+constructed to represent a 3D transformation using the above axes. Hence, the
+identity 3D rotation matrix $M_0$ can also be defined here.
 
 \begin{align*}
     M = \begin{bmatrix}
@@ -474,13 +479,16 @@ For a transformation $T_M(\vec{v})$ on $\vec{v} = \begin{bmatrix}
     \end{bmatrix}
 \end{align*}
 
-In our case, we seek to perform a rotation on a set of 3D points, meaning that
-we would need a form for a 3D rotation matrix. Like observed in the 2D case, a
-rotation could affect more than one axis, and so it is important to consider the
-matrix as a whole. Historically, many different ways of constructing rotation
-matrices have been shown, each with their benefits and downsides. In a sense,
-rotation matrices are not an entirely independent method of performing rotation,
-but are rather an underlying infrastructure for other methods to use.
+Now that we are familiar with the form of a 3D rotation matrix, we can move on
+to methods of constructing one. Like observed in the 2D case, a rotation could
+affect more than one axis, and so it is important to consider the matrix as a
+whole. Historically, many different ways of constructing rotation matrices have
+been shown, each with their benefits and downsides. In a sense, rotation
+matrices are not an entirely independent method of performing rotation, but are
+rather an underlying infrastructure for other methods to use, which is
+significant because it implies that comparison of rotation matrices to other
+rotation methods alone is nonsensical, and that the method through which the
+matrix is constructed is far more relevant for comparison against.
 
 \subsection{Construction from Euler angles}
 
@@ -680,11 +688,21 @@ rotating by an axis A, then rotating by B would be the same as rotating first by
 axis B, then by A. Hence, it is important to note that the order of
 multiplication of $R_z$, $R_y$ and $R_x$ produces a unique final rotation. For
 the rest of the investigation, the $x \to y \to z$ rotation order seen above
-will be used. This is alternatively called the ZYX Tait-Bryan order.
+will be used. This is alternatively called the ZYX Tait-Bryan order (Wikipedia
+Contributors, 2023). \\
+
+It is important to note that traditionally, there has been no set standard
+defining which rotation order to use - this is left up to choice. In 3D software
+which uses Euler angles, it is still required to manually specify the order of
+rotation. When working with large teams of people, such as in an animation and
+game development studio, or a scientific research team, it is still required to
+agree on a standard order of Euler angles to avoid ambiguity and
+misunderstanding, which is potentially a weakness of using the Euler angle
+system in the first place. \\
 
 \pagebreak
 \subsection{The gimball lock problem}
-There is one large problem with constructing rotation matrices from Euler
+There is another large problem with constructing rotation matrices from Euler
 angles. Suppose you rotated an object with the Euler angles
 $\alpha$, $\beta$ and $\gamma$, where $\beta=\frac{\pi}{2}$
 
@@ -696,12 +714,14 @@ $\alpha$, $\beta$ and $\gamma$, where $\beta=\frac{\pi}{2}$
              -\sin\frac{\pi}{2}          & \sin\alpha\cos\frac{\pi}{2}                                  & \cos\alpha\cos\frac{\pi}{2}                                  \\
          \end{bmatrix}
     \\
+    &\text{Substituting $\cos\frac{\pi}{2} = 0$ and $\sin\frac{\pi}{2} = 1$:} \\
      & = \begin{bmatrix}
              0  & \sin\alpha\cos\gamma - \cos\alpha\sin\gamma & \cos\alpha\cos\gamma + \sin\alpha\sin\gamma \\
              0  & \sin\alpha\sin\gamma + \cos\alpha\cos\gamma & \cos\alpha\sin\gamma - \sin\alpha\cos\gamma \\
              -1 & 0                                           & 0                                           \\
          \end{bmatrix}
     \\
+    &\text{Applying trigonometric identities:} \\
      & = \begin{bmatrix}
              0  & \sin(\alpha - \gamma) & \cos(\alpha - \gamma)  \\
              0  & \cos(\alpha - \gamma) & -\sin(\alpha - \gamma) \\
@@ -709,7 +729,8 @@ $\alpha$, $\beta$ and $\gamma$, where $\beta=\frac{\pi}{2}$
          \end{bmatrix}
 \end{align*} \\
 
-Let $\alpha - \gamma = \theta$. The rotation matrix $R$ now becomes $R(\theta) =
+Let $\alpha - \gamma = \theta$. The rotation matrix $R$ can now be expressed as
+$R(\theta) =
     \begin{bmatrix} 0  & \sin\theta & \cos\theta  \\
     0  & \cos\theta & -\sin\theta \\
     -1 & 0          & 0           \\
@@ -767,17 +788,26 @@ rigorously representing 3D rotations. \\
 \section{Improving on Euler angles with Quaternions}
 In 1843, Irish mathematician Sir William Rowan Hamilton proposed an alternative
 way to represent 3D rotation by using four dimensional imaginary numbers called
-"quaternions". Quaternions allow us to rotate any point vector around any axis
-by a certain angle. This method of rotation is not anything special in
-particular - in fact, rotating around the X, Y and Z axes individually has
-already been explored in section \ref{section_deriving_rot_for_each_angle}.
+"quaternions". Quaternions allow us to rotate any 3D point vector around any 3D
+axis by a certain angle with the power of four dimensions (Dam, Koch and Lillholm, 1998). This method of
+rotation is not anything special in particular, in fact, rotating around the X,
+Y and Z axes individually has already been explored in section
+\ref{section_deriving_rot_for_each_angle}. \\
 
-\subsection{Standard Form}
+Quaternions, like rotation matrices constructed from Euler angles, have seen
+numerous applications in pretty nearly all fields of science and engineering
+where 3D rotations are required. As we will soon see, Quaternions address many
+of the downsides of Euler angle matrices, and can often be a very efficient
+alternative to them.
+
+\pagebreak
+
+\subsection{Hamilton's Definition}
 Quaternions, like complex numbers, are defined with "real" and "imaginary"
 parts, and are essentially an extension of the complex numbers to four
-dimensions. The set of all quaternions is known as $\mathbb{H}$, named after the
-last initial of the Irish mathematician William Rowan Hamilton. Algebraically, a
-quaternion $q$ can be defined in terms of the coefficients of its terms:
+dimensions. The set of all quaternions is known as $\mathbb{H}$, named after
+Hamilton. Algebraically, a quaternion $q$ can be defined in terms of the
+coefficients of its terms:
 
 \begin{align*}
     q = a + bi + cj + dk \quad a, b, c, d \in \mathbb{R}
@@ -791,12 +821,18 @@ interact with each other in that they must satisfy the equality
     i^2 = j^2 = k^2 = ijk = -1
 \end{align*}
 
-\subsection{Basic Quaternions}
+\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad\qquad
+(Dam, Koch and Lillholm, 1998).
 
+\subsection{Basic Quaternions}
+In order to start using quaternions for rotation, we must first explore the
+details that their definition implies. We must first define how $i$, $j$, and
+$k$ interact algebraically, as this will be the basis for many of the
+quaternion's properties.
 \subsubsection{Multiplying by Real Numbers}
 For any $n \in \mathbb{R}$, it is defined that $in = ni$, $jn = nj$ and $kn =
     nk$. Hence, for any $q \in \mathbb{H}$, $qn = nq$. Quaternion multiplication by
-real numbers does, in fact, commute.
+real numbers does, in fact, commute (Dam, Koch and Lillholm, 1998).
 
 \subsubsection{Multiplication by other basic quaternions}
 Hamilton's quaternion definition can then be used to derive the multiplicative
@@ -854,10 +890,10 @@ interactions between $i$, $j$ and $k$:
     \end{aligned}
 \end{align*}
 
-An important concept becomes apparent from the above calculations - quaternion
-multiplication by other quaternions is not commutative, that is, it can be the
-case that $q_1q_2 \neq q_2q_1$ where $ q_1,q_2 \in \mathbb{H}$. For example, it
-is seen above that while $ij = k$, $ji = -k$. \\
+An important concept becomes apparent from the above calculations. Like with
+matrices, quaternion multiplication by other quaternions is not commutative,
+that is, it can be the case that $q_1q_2 \neq q_2q_1$ where $ q_1,q_2 \in
+\mathbb{H}$. For example, it is seen above that while $ij = k$, $ji = -k$. \\
 
 The multiplication table of basic quaternions is hence formed:
 
@@ -877,6 +913,12 @@ The multiplication table of basic quaternions is hence formed:
     \captionof{table}{Basic quaternion noncommutative multiplication table}\label{sophisticatedtable}
 \end{center}
 
+As an aside, it is perhaps interesting that the noncommutativity of quaternions
+and matrices reflects the noncommutativity of rotations in 3D space. It could be
+the case that mathematical models used to represent rotations are noncommutative
+because the order of rotations themselves matters, and what we see as an
+algebraic constraint is a reflection of what is physically possible. \\  
+
 \subsubsection{Associativity}
 Quaternion multiplication is associative in that $(q_1 q_2) q_3 = q_1 (q_2 q_3)$
 where $q_1,q_2,q_3 \in \mathbb{H}$.
@@ -890,7 +932,7 @@ techniques like the distributive law.
 \subsubsection{Multiplication of non-basic quaternions}
 Let $q_1 = a_1 + b_1i + c_1j + d_1k$ and $q_2 = a_2 + b_2i + c_2j + d_2k$ where
 $a_1, b_1, c_1, d_1, a_2, b_2, c_2, d_2 \in \mathbb{R}$. The multiplication
-$q_1q_2$ can be computed using the distrivutive law.
+$q_1q_2$ can be computed using the distributive law.
 
 \begin{align*}
     q_1q_2 & = (a_1 + b_1i + c_1j + d_1k)(a_2 + b_2i + c_2j + d_2k)    \\
@@ -905,6 +947,8 @@ $q_1q_2$ can be computed using the distrivutive law.
            & + (a_1c_2 - b_1d_2 + c_1a_2 + d_1b_2)j                    \\
            & + (a_1d_2 + b_1c_2 - c_1b_2 + d_1a_2)k
 \end{align*}
+
+\pagebreak
 
 \subsubsection{Conjugation}
 For any quaternion $q = a + bi + cj + dk \quad a, b, c, d \in \mathbb{R}$, its
@@ -928,75 +972,303 @@ Suppose one was to multiply a quaternion $q$ by its conjugate $q^*$,
          & + abi + b^2 - bck + bdj                           \\
          & + acj + bck + c^2 - cdi                           \\
          & + adk - bdj + cdi + d^2                           \\
-    \\
-         & a, b, c, d \in \mathbb{R}                         \\
-         & \therefore a^2 + b^2 + c^2 + d^2 \in \mathbb{R}
+         & = a^2 + b^2 + c^2 + d^2                           \\
+         \\
+         & \text{Additionally, given } a, b, c, d \in \mathbb{R} \\
+         & \therefore a^2 + b^2 + c^2 + d^2 \in \mathbb{R}       \\
+         & \therefore qq^* \in \mathbb{R}
 \end{align*}
 
 Hence, if you multiply a quaternion by its conjugate, the result will always be
-a real number and equal to the sum of the squares of its coefficients.
+a real number and equal to the sum of the squares of its coefficients. \\
+
+\subsubsection{Norm}
+The norm of a quaternion $q$ is defined as $|q| = \sqrt{qq^*} = \sqrt{a^2 + b^2
++ c^2 + d^2}$, corresponding to the length of the quaternion in 4D space, coming
+from the extension of the Pythagorean theorem in four dimensions. A quaternion
+of norm $1$ is called a unit quaternion. It is hence possible to normalize a
+quaternion $q$ into by dividing it by its norm. If $\hat{q}$ represents the
+normalization of $q$, $q \in \mathbb{H}$, $\hat{q} = \frac{q}{|q|}$. \\
 
 % https://www.quora.com/How-do-I-find-the-inverse-of-a-quaternion
+\pagebreak
 
 \subsubsection{Inverse}
-The inverse $q^{-1}$ of a quaternion $q = a + bi + cj + dk$ exists such that $qq^{-1} = 1$,
+The inverse $q^{-1}$ of a quaternion $q$ exists such that $qq^{-1} = 1$,
 effectively "undoing" any multiplication caused by $q$. The inverse of a
 quaternion can be computed using the previosuly established rules.
 
 \begin{align*}
      & qq^{-1} = 1 \Rightarrow q^{-1} = \frac{1}{q}         \\
-     & \frac{1}{q} \cdot \frac{q^*}{q^*} = \frac{q^*}{qq^*}
-    = \frac{q^*}{a^2 + b^2 + c^2 + d^2}
+     & \Rightarrow q^{-1} = \frac{1}{q} \cdot \frac{q^*}{q^*} = \frac{q^*}{qq^*}
+    = \frac{q^*}{a^2 + b^2 + c^2 + d^2} = \frac{q^*}{|q|^2}
 \end{align*}
 
-\subsection{Proof that $qpq^{-1}$ returns a pure quaternion}
+In terms of 3D rotations, the inverse of a quaternion allows one to effectively
+"reverse" or "undo" a rotation. In this way, inverses of rotation matrices (and
+not only those constructed from Euler angles), exibit similarity to inverses of
+quaternions.
 
-Whenever a pure quaternion is multiplied by a rotation quaternion, the
-transformation inevitably distorts it into the fourth dimension.
+\subsection{Rotating point vectors}
+Although quaternions harbor many different interesting properties, from the very
+beginning, Hamilton defined them out of the need for unit quaternions to
+represent 3D rotation in a straightforward manner.
 
-% https://math.stackexchange.com/questions/1354627/why-is-it-so-that-a-unit-quaternion-t-can-be-written-as-t-cos-thetau-sine
-% cos^2 \theta + sin^2 \theta = 1
+Hamilton's method of rotation involves taking a vector one wishes to rotate, for
+example $\vec{v} = \begin{bmatrix} x \\ y \\ z \end{bmatrix}$ and constructing a
+quaternion $p$ out of it such that $p = xi + yj + zk$. As the real part $\Re(p)$
+of $p$ is zero, $p$ is called a "pure quaternion". \\
+
+Like with rotation matrices, one can then construct a "rotation quaternion" $q =
+a + bi + cj +dk$ that represents a rotation about an axis $\vec{g} =
+\begin{bmatrix} b \\ c \\ d \end{bmatrix}$ by an angle $\theta$. % The axis
+% represents a direction in 3D space, and is hence a unit vector. That is,
+% $\vec{g} = \vec{\hat{g}}$. \\
+
+Considering that $q$ is a unit quaternion,
 
 \begin{align*}
-    qp     & = (a_qa_p - b_qb_p - c_qc_p - d_qd_p)                \\
-           & + (a_qb_p + b_qa_p + c_qd_p - d_qc_p)i               \\
-           & + (a_qc_p - b_qd_p + c_qa_p + d_qb_p)j               \\
-           & + (a_qd_p + b_qc_p - c_qb_p + d_qa_p)k               \\
+    &|q| = 1 = |q|^2 = a^2 + b^2 + c^2 + d^2 \\
+    &\text{Given that } \sin^2\theta + \cos^2\theta = 1, \\
+    &a^2 + (b^2 + c^2 + d^2) = 1 = \sin^2\theta + \cos^2\theta \\
+    &\text{From this, one could infer that} \\
+    &a = \cos\theta, \sqrt{b^2 + c^2 + d^2} = \sin\theta = |\vec{g}|
+\end{align*}
+
+Let $h$ equal a quaternion of the form $h = bi + cj + dk$.
+\begin{align*}
+    &|\vec{g}| = |h| = \sqrt{b^2 + c^2 + d^2} \\
+    &bi + cj + dk = \frac{(bi + cj + dk)}{|\vec{g}|}|\vec{g}| = \frac{h}{|h|}|\vec{g}| = \hat{h}\sin\theta
+\end{align*}
+
+Hence, for a rotation by any axis and angle, one can construct a rotation
+quaternion $q = \cos\theta + \hat{h}\sin\theta$, where $\theta$ represents the
+rotation angle, and $\hat{h}$ represents the normalization of a pure quaternion
+of the form $xi + yj + zk$ where $x$, $y$ and $z$ are the components of a 3D
+vector representing the rotation axis. \\
+
+\pagebreak
+
+When Hamilton was looking into rotation, he discovered that whenever a pure
+quaternion $p$ is multiplied by a rotation quaternion $q$ from the left, the
+transformation inevitably distorts it into the fourth dimension. That is, the
+result of the multiplication is no longer a pure quaternion as
+$\Re(qp) \neq 0$. \\
+
+Hamilton hence defined the rotation of a pure quaternion $p$ to $r$ by a
+rotation quaternion $q$ as $r = qpq^{-1} = qpq^*$. By multiplying by $q^{-1}$, from the
+right, the change in $\Re(qp)$ is undone, but the change in $\Im(qp)$ is applied
+again. Effectively, this means that the rotation described by $q$ is applied to
+the vector represented by pure quaternion $p$ twice. \\
+
+Knowing this, one can remedy this problem by simply halving the rotation angle.
+Finally, this leaves us with the following formula for the rotation of a vector
+$\vec{v} = \begin{bmatrix} x \\
+    y \\
+    z
+\end{bmatrix}$ around an axis $\vec{g} = \begin{bmatrix}
+    b \\
+    c \\
+    d
+\end{bmatrix}$ by an angle $\theta$ using quaternions:
+
+\begin{align*}
+    &\text{Let } p = xi + yj + zk \\
+    &\text{Let } h = bi + cj + dk \\
+    &\text{Let } q = \cos\frac{\theta}{2} + \frac{h}{|h|}\sin\frac{\theta}{2} \\
+    &r = qpq^{-1}
+\end{align*}
+
+Evaluating $r = qpq^{-1}$, if $q = a_q + b_qi + c_qj + d_qk$
+
+\begin{align*}
+    qp     & = (- b_qx - c_qy - d_qz)                \\
+           & + (a_qx + c_qz - d_qy)i               \\
+           & + (a_qy - b_qz + d_qx)j               \\
+           & + (a_qz + b_qy - c_qx )k               \\ \\
            & \text{Let:\space}                                    \\
-    a_{qp} & = a_qa_p - b_qb_p - c_qc_p - d_qd_p,                 \\
-    b_{qp} & = a_qb_p + b_qa_p + c_qd_p - d_qc_p,                 \\
-    c_{qp} & = a_qc_p - b_qd_p + c_qa_p + d_qb_p,                 \\
-    d_{qp} & = a_qd_p + b_qc_p - c_qb_p + d_qa_p                  \\
+           &a_{qp} =- b_qx - c_qy - d_qz,                 \\
+           &b_{qp} = a_qx + c_qz - d_qy,                 \\
+           &c_{qp} = a_qy - b_qz + d_qx,                 \\
+           &d_{qp} = a_qz + b_qy - c_qx                  \\
     \\
            & \text{As q is of norm one, } q^{-1} = q^*            \\
-           & \therefore qpq^{-1} = qpq^*                          \\
+           & \therefore qpq^{-1} = qpq^* = r                      \\
            & = a_{qp}a_q + b_{qp}b_q + c_{qp}c_q + d_{qp}d_q      \\
            & + (- a_{qp}b_q + b_{qp}a_q - c_{qp}d_q + d_{qp}c_q)i \\
            & + (- a_{qp}c_q + b_{qp}d_q + c_{qp}a_q - d_{qp}b_q)j \\
            & + (- a_{qp}d_q - b_{qp}c_q + c_{qp}b_q + d_{qp}a_q)k \\
 \end{align*}
 
-In order for $qpq^*$ to be pure, its real part must be equal to zero. \\
-Let $a_{qpq^*}$ be the real part of $qpq^*$.
+Knowing that $qpq*$ must be a pure quaternion, one can extract the final rotated
+point vector $\vec{r}$ from $\Im(qpq*)$.
 
 \begin{align*}
-    a_{qpq^*} & = a_{qp}a_q + b_{qp}b_q + c_{qp}c_q + d_{qp}d_q                            \\
-              & = a_q(a_qa_p - b_qb_p - c_qc_p - d_qd_p)                                   \\
-              & + b_q(a_qb_p + b_qa_p + c_qd_p - d_qc_p)                                   \\
-              & + c_q(a_qc_p - b_qd_p + c_qa_p + d_qb_p)                                   \\
-              & + d_q(a_qd_p + b_qc_p - c_qb_p + d_qa_p)                                   \\
-              & =a_q^2a_p - a_qb_qb_p - a_qc_qc_p - a_qd_qd_p                              \\
-              & + b_qa_qb_p + b_q^2a_p + b_qc_qd_p - b_qd_qc_p                             \\
-              & + c_qa_qc_p - c_qb_qd_p + c_q^2a_p + c_qd_qb_p                             \\
-              & + d_qa_qd_p + d_qb_qc_p - d_qc_qb_p + d_q^2a_p                             \\
-              & = a_q^2a_p + b_q^2a_p + c_q^2a_p + d_q^2a_p                                \\
-              & = a_p(a_q^2 + b_q^2 + c_q^2 + d_q^2)                                       \\
-              & = a_p = 0                                                                  \\
-              & \therefore qpq^{-1} \text{ is pure for } ||q||^2 = 1, \mathfrak{Re}(p) = 0
+    &\text{Given} \\
+    \vec{r} = &\begin{bmatrix}
+        - a_{qp}b_q + b_{qp}a_q - c_{qp}d_q + d_{qp}c_q \\
+        - a_{qp}c_q + b_{qp}d_q + c_{qp}a_q - d_{qp}b_q \\
+        - a_{qp}d_q - b_{qp}c_q + c_{qp}b_q + d_{qp}a_q
+    \end{bmatrix} \\
+    &\text{Substituting $a_{qp}$, $b_{qp}$, $c_{qp}$ and $d_{qp}$:} \\
+    =&\left[\begin{matrix}
+        (b_qx + c_qy + d_qz)b_q + (a_qx + c_qz - d_qy)a_q \\
+        (b_qx + c_qy + d_qz)c_q + (a_qx + c_qz - d_qy)d_q \\
+        (b_qx + c_qy + d_qz)d_q - (a_qx + c_qz - d_qy)c_q
+    \end{matrix}\right.\\
+    &\hspace{0.24cm}
+    \left.\begin{matrix}
+        - (a_qy - b_qz + d_qx)d_q + (a_qz + b_qy - c_qx )c_q \\
+        + (a_qy - b_qz + d_qx)a_q - (a_qz + b_qy - c_qx )b_q \\
+        + (a_qy - b_qz + d_qx)b_q + (a_qz + b_qy - c_qx )a_q
+    \end{matrix}\right] \\
+    &\text{Expanding:} \\
+    = &\begin{bmatrix}
+        a_q^2 x + 2 a_q c_q z - 2 a_q d_q y + b_q^2 x + 2 b_q c_q y + 2 b_q d_q z - c_q^2 x - d_q^2 x \\
+        a_q^2 y - 2 a_q b_q z + 2 a_q d_q x - b_q^2 y + 2 b_q c_q x + c_q^2 y + 2 c_q d_q z - d_q^2 y \\
+        a_q^2 z + 2 a_q b_q y - 2 a_q c_q x - b_q^2 z + 2 b_q d_q x - c_q^2 z + 2 c_q d_q y + d_q^2 z
+    \end{bmatrix} \\
+    &\text{Collecting like terms:} \\
+    = &\begin{bmatrix}
+        (a_q^2 + b_q^2 - c_q^2 - d_q^2)x &+& (2 b_q c_q - 2 a_q d_q)y &+& (2 a_q c_q + 2 b_q d_q)z \\
+        (2 a_q d_q + 2 b_q c_q)x &+& (a_q^2 - b_q^2 + c_q^2 - d_q^2)y &+& (2 c_q d_q - 2 a_q b_q) z \\
+        (2 b_q d_q - 2 a_q c_q)x &+& (2a_qb_q + 2c_qd_q)y &+& (a_q^2 - b_q^2 - c_q^2 + d_q^2)z
+    \end{bmatrix} \\
+    &\text{Factoring out $[x, y, z]$:} \\
+    = &\begin{bmatrix}
+        a_q^2 + b_q^2 - c_q^2 - d_q^2 & 2(b_q c_q - a_q d_q)         & 2(a_q c_q + b_q d_q) \\
+        2(a_q d_q + b_q c_q)         & a_q^2 - b_q^2 + c_q^2 - d_q^2 & 2(c_q d_q - a_q b_q) \\
+        2(b_q d_q - a_q c_q)         & 2(a_qb_q + c_qd_q)             & a_q^2 - b_q^2 - c_q^2 + d_q^2
+    \end{bmatrix}\begin{bmatrix}x \\ y \\ z\end{bmatrix} \\
+    = &\begin{bmatrix}
+        1 - 2(c_q^2 + d_q^2) & 2(b_q c_q - a_q d_q)         & 2(a_q c_q + b_q d_q) \\
+        2(a_q d_q + b_q c_q)         & 1 - 2(b_q^2 + d_q^2) & 2(c_q d_q - a_q b_q) \\
+        2(b_q d_q - a_q c_q)         & 2(a_qb_q + c_qd_q)             & 1 - 2(b_q^2 + c_q^2)
+    \end{bmatrix}\begin{bmatrix}x \\ y \\ z\end{bmatrix} \\
 \end{align*}
+
+Looking at the above result, we can see that the formula for rotation using
+quaternions can actually also be represented using a linear transformation
+matrix. This means that, in fact, rotation matrices can be constructed out of
+quaternions as well, without suffering from shortcomings of Euler angles such as
+gimball lock. \\
+
+\subsection{Computational complexity}
+Although this formula is admittedly quite long, and might even appear more
+complicated than the formula for deriving rotation matrices from Euler angles,
+it is interesting to note that the contrary could actually be true. \\
+
+One of the main use cases of quaternions is to allow computers to calculate
+virtual 3D rotation in 3D software. Personally, I use quaternions constantly
+during game development, as they are the preferred rotation option in game
+popular game-making frameworks like the Unity Game Engine, Unreal Engine and
+Godot. Although the formula above may be confusing for a human to keep track of,
+it must be considered that, compared to constructing a rotation matrix from
+Euler angles, it comprises of the same number of multiplications and additions,
+the results of which which can be carried out once and stored in the computer's
+memory, and then used to calculate the rotation of any large number of points
+inexpensively. Given that quaternions also address many of the faults of Euler
+angles, it is clear that they harbor much better value of flexibility for
+performance. \\
+
+In terms of raw storage space, quaternions are also more efficient to store than
+rotation matrices in a computer's memory. A quaternion is comprised of 4 scalar
+numbers, whereas a rotation matrix requires 9. Storing precise non-integer
+numbers, called "floating point numbers" in a computer's memory is
+computationally expensive, and so in memory constrained environments,
+quaternions could possibly be a much better option. \\
+
+However, it is important to note that in such environments, if it is acceptable
+to incur some of the shortcomings of Euler angles, then they could be a better
+option for the application as they only require 3 scalar numbers to be stored,
+with the drawback of having to be converted to the aforementioned rotation
+matrix whenever points have to be rotated. In situations where the rotation has
+to be measured, Euler angles could also be a strong choice, which could be a
+possible justification for their usage in the Apollo 11 mission.  \\
+
+\subsection{Usability for humans}
+In terms of usability, quaternions are also much harder to interpret from a
+human perspective, as it is difficult for the average person to visualise a four
+dimensional space. Furthermore, they could prove cumbersome to construct by
+hand, due to the numerous operations required to do so. This is not a negligible
+issue because, often, the users of 3D softwares are artists or researchers which
+seek to devote time and attention to their art or research, instead of investing
+themselves with how quaternions work. To that extent, Euler angles are far
+easier to understand and could prove more productive to their application in
+terms of human usability. \\
+
+However, it is important to note that in most cases, the software that uses
+quaternions will provide a graphical interface to allow the user to manipulate
+the axis of rotation, and the angle of rotation, without having to worry about
+the underlying mathematics. In such cases, quaternions could prove to be a
+better option, as they are more flexible and do not suffer from the problems of
+Euler angles. \\
+
+\pagebreak
+
+\subsection{Spherical Linear Interpolation}
+Another aspect of rotations which quaternions excel at is spherical linear
+interpolation - a smooth interpolation of rotation following the shortest arc to
+the destination on a unit sphere. When interpolating rotation, one cannot
+naively use linear interpolation with the coefficients of quaternions, as that
+will result in non-smooth and unexpected jumps. \\
+
+Suppose that one wishes to interpolate between two unit quaternions $q_a$ to
+$q_b$ over a time period of $t$, $0 \leq t \leq 1$. Let the unit quaternion that
+represents the interpolated rotation at time $t$ be $q$. Shoemake (1985)
+proposed a simple and efficient formula for calculating $q$:
+
+\begin{align*}
+    q = \frac{\sin((1 - t)\theta)}{\sin\theta}q_a + \frac{\sin(t\theta)}{\sin\theta}q_b
+\end{align*}
+
+Although this looks simple for quaternions, the same cannot be said for rotation
+matrices constructed from Euler angles. Indeed, linearly interpolating between
+each individual Euler angle also results in non-smooth movement and unexpected
+jumps. Any spherical linear interpolation formulas proposed for Euler angles
+are, to date complex and expensive to compute compared to what is possible with
+quaternions. \\
+
+In that regard, quaternions are a much better option in contexts where motion is
+required, making them convenient for 3D rotation in computer animations, video
+games, and CGI. \\
+
+% https://math.stackexchange.com/questions/1354627/why-is-it-so-that-a-unit-quaternion-t-can-be-written-as-t-cos-thetau-sine
+% cos^2 \theta + sin^2 \theta = 1
+
+\section{Conclusion}
+In conclusion, it cannot be said for sure that quaternions outright supersede
+rotation matrices constructed from Euler angles. Euler angles remain a simpler,
+more intuitive and more human-friendly way to represent rotation, despite their
+shortcomings such as being prone to gimball lock. Meanwhile, quaternions excel
+at their flexibility in terms of ability to be interpolated and represent
+arbitrary rotations without gimball lock. In terms of performance in computing,
+both are on a similar level, though quaternions are slightly more efficient in
+terms of storage space as Euler angles, despite being smaller on their own,
+require a 3$\times$3 matrix to actually be useful. \\
+
+Overall, this investigation has revealed why both quaternions and Euler angles
+are still in use today, and why neither has been completely superseded by the
+other. It is clear that both have their own strengths and weaknesses, and that
+the choice of which to use depends on the context of the application, though
+they are not mutually exclusive - it is often the case that both can be seen
+available for use as a complement to each other. \\
+
+\textbf{Words: } 4000
+
+\pagebreak
+\section{Bibliography}
+\begin{itemize}[rightmargin=2cm]
+    \item Huynh, DQ 2009, "Metrics for 3D Rotations: Comparison and Analysis", Journal of Mathematical Imaging and Vision, vol. 35, no. 2, pp. 155-164.
+    \item Dam, E., Koch, M. and Lillholm, M. (1998). Quaternions, Interpolation
+    and Animation. [online] MIT. Available at:
+    https://web.mit.edu/2.998/www/QuaternionReport1.pdf.
+    \item Wikipedia Contributors (2019). Rotation matrix. [online] Wikipedia. Available at: \url{https://en.wikipedia.org/wiki/Rotation_matrix} [Accessed February 2023].
+    \item Wikipedia Contributors (2023). Slerp. [online] Wikipedia. Available at: \url{https://en.wikipedia.org/wiki/Slerp} [Accessed May 2023].
+    \item Apollo11Space. (2021). Apollo and Gimbal Lock. [online] Available at: \url{https://apollo11space.com/apollo-and-gimbal-lock/}.
+    \item Shoemake, K (1985), "Animating rotation with quaternion curves", Proceedings of the 12th annual conference on Computer graphics and interactive techniques  - SIGGRAPH ’85, vol. 19, no. 3.
+\end{itemize}
 
 \end{document}
 
 % https://apollo11space.com/apollo-and-gimbal-lock/
-
-% hello 

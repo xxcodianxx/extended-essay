@@ -8,15 +8,18 @@ def gen_data():
     X, Y, Z = [], [], []
     for x in range(-V, V+1,):
         for y in range(-V, V+1):
-            for z in range(-V, V+1):
-                if sum([
-                    abs(x) == V, 
-                    abs(y) == V, 
-                    abs(z) == V]
-                ) >= 2:
-                    X.append(x)
-                    Y.append(y)
-                    Z.append(z)
+            X.append(x)
+            Y.append(y)
+            Z.append(0)
+            # for z in range(-V, V+1):
+            #     if sum([
+            #         abs(x) == V, 
+            #         abs(y) == V, 
+            #         abs(z) == V]
+            #     ) >= 2:
+            #         X.append(x)
+            #         Y.append(y)
+            #         Z.append(z)
     return X, Y, Z
 
 def vec3_normalized(x, y, z):
@@ -36,7 +39,7 @@ def plot_line(from_, to_, *args, **kwargs):
     ax.plot([from_[0], to_[0]], [from_[1], to_[1]], [from_[2], to_[2]], *args, **kwargs)
 
 
-around = vec3_normalized(*[0, 0, 1])
+around = vec3_normalized(*[1, 1, 1])
 angle = pi / 4
 
 plot_point([0, 0, 0], color='black')
@@ -62,7 +65,7 @@ for x, y, z in zip(X, Y, Z):
 
 ax.scatter(X_R, Y_R, Z_R, color='red')
 
-ax.set_proj_type('persp', 0.2)   # type: ignore
+# ax.set_proj_type('persp', 0.2)   # type: ignore
 ax.set_box_aspect([1, 1, 1])     # type: ignore
 
 plt.show()
