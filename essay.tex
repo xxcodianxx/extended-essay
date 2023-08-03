@@ -34,45 +34,68 @@
 \pagebreak
 
 \section{Introduction}
-Historically, mathematicians have endeavoured to describe the real world around
-us using mathematics. While mathematicians often create simplifications or
-models in lower dimensions, as is the case with disciplines like trigonometry
-and complex numbers, we are ultimately inhabitants of a three dimensional world.
-In the modern day, demand for working in three dimensions is ever increasing,
-with scientific applications in aerodynamic modeling, astrophysics, robotics and
-computational chemistry, in addition to numerous uses in computer generated
-imagery (CGI). In all of these use cases, there is a need for a rigorous
-mathematical framework to represent and manipulate the 3D world. \\
+Historically, mathematicians have endeavoured to accurately describe the real
+world around us using mathematics. One of the most fundamental necessities of
+working with geometry applicable to real life is the ability to reason about
+mathematical properties in three dimensions. In the modern day, demand for
+working in three dimensions is ever increasing, with scientific applications in
+aerodynamic modeling, astrophysics, robotics and computational chemistry, in
+addition to numerous uses in computer generated imagery (CGI). In all of these
+use cases, there is a need for a rigorous mathematical framework to represent
+and manipulate the 3D world. \\
 
 One of the intuitively simplest, but surprisingly complex aspects of
 transitioning from a two dimensional space to three dimensional is the problem
 of rotation. Indeed, there currently exist several competing mathematical models
 for 3D rotation in common use which bear their own strengths and weaknesses. Of
-these, some of the most commonly seen constructs are 3D "rotation matrices",
-which are usually constructed from "Euler angles", and Quaternions (Huynh, 2009).\\
+these, some of the most common are 3D ``rotation matrices'' (which are usually
+constructed from ``Euler angles"), and ``quaternions'' (Huynh, 2009).\\
 
-This investigation aims to compare and contrast these methods of rotation in
-order to draw conclusions about the usefulness and applicability of Quaternions
-in 3D computer graphics and scientific simulations, compared to rotation matrices
-constructed from Euler angles. \\
+
+This investigation aims to explore the extent to which quaternions can perform
+better than rotation matrices constructed from Euler angles in representing 3D
+rotation, in order to draw conclusions about the applicability and usefulness of
+different rotation methods in computer graphics and scientific simulations. \\
 
 As an aspiring computer animator and game developer, this question is of real
-significance to me as it will prove to be invaluable experience in the
-underlying concepts of my future field of work. In the near future, the
-understanding of rotation methods I have gained from this essay will allow me to
-apply them to game prototypes I create. Hence, in order to build intuition for
-myself, nearly all of the formulas and proofs in this essay are of my own
-independent derivation, with some external sources used for inspiration and
-guidance. \\
+significance to me as it will provide invaluable experience in the underlying
+concepts of my field of work for me. The understanding of rotation methods I
+would gain from this essay will allow me to apply mathematical knowledge to game
+prototypes I create, especially when programming physics or movement systems.
+Additionally, I have noticed that developers working on the creative part of
+their work often do not understand mathematical concepts underpinning tools they
+work with daily, and this leads to ambiguity and confusion when communicating
+with other developers or composing scenes in a game engine. Often, I feel like
+this could be due to the barrier of entry to learning the underlying math
+appearing to be high, leaving many afraid to investigate. I hope that this work
+will help me and others in demistyfing how quaternions and rotation matrices
+work, in addition to showing why and when they are useful in an accessible
+manner. In order to build intuition for myself and the reader, nearly all of the
+formulas and proofs in this essay are of my own independent derivation, with
+some external sources used for inspiration and guidance, which should hopefully
+demonstrate that one does not need a tertiary education degree to tackle this
+topic holistically. \\
+
+In order to answer the question, I first build intution for the reader by
+examining how rotation works in two dimensions by introducing the concept of
+rotating axes using two dimensional transformation matrices, and then extend
+this to the three dimensions. I then introduce and evaluate the concept of Euler
+angles and link them with how they can be used to construct 3D rotation
+matrices. Following this, I introduce the concept of quaternions from Hamilton's
+original definition and independently develop fundemental rules for operations
+with them. Finally, I investigate how quaternions can be used to represent 3D
+rotation and compare various aspects of their performance to rotation matrices
+constructed from Euler angles in order to draw conclusions about whether one of
+could supersede the other in representing 3D rotation.
 
 \pagebreak
 
 \section{Rotation Matrices}
-Rotation matrices are considered one of the most versatile ways of doing 3D
-rotation. They are often used in computer animation and praised for their
-computational efficiency and versatility. Mathematically, they represent
-specific a 3D linear transformation which, when applied to a set of points,
-describes a 3D rotation.
+Rotation matrices are considered one of the most versatile and fundamental ways
+of doing 3D rotation. They are often used in computer animation and praised for
+their computational efficiency and versatility. Mathematically, they represent a
+3D linear transformation which, when applied to a set of points, describes a 3D
+rotation.
 
 \subsection{In two dimensions}
 It is worthwile conceptually exploring what happens in two dimensions first, as
@@ -796,7 +819,7 @@ Y and Z axes individually has already been explored in section
 
 Quaternions, like rotation matrices constructed from Euler angles, have seen
 numerous applications in pretty nearly all fields of science and engineering
-where 3D rotations are required. As we will soon see, Quaternions address many
+where 3D rotations are required. As we will soon see, quaternions address many
 of the downsides of Euler angle matrices, and can often be a very efficient
 alternative to them.
 
