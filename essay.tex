@@ -7,7 +7,7 @@
     physics, mathtools, setspace,
     array, caption, float,
     tikz, tikz-3dplot, multicol,
-    stackengine, enumitem
+    stackengine, enumitem, subfig
 }
 
 \usepackage[hmarginratio=1:1, margin=0.5in, includeheadfoot]{geometry}
@@ -62,30 +62,31 @@ significance to me as it will provide invaluable experience in the underlying
 concepts of my field of work for me. The understanding of rotation methods I
 would gain from this essay will allow me to apply mathematical knowledge to game
 prototypes I create, especially when programming physics or movement systems.
-Additionally, I have noticed that developers working on the creative part of
-their work often do not understand mathematical concepts underpinning tools they
-work with daily, and this leads to ambiguity and confusion when communicating
-with other developers or composing scenes in a game engine. Often, I feel like
-this could be due to the barrier of entry to learning the underlying math
-appearing to be high, leaving many afraid to investigate. I hope that this work
-will help me and others in demistyfing how quaternions and rotation matrices
-work, in addition to showing why and when they are useful in an accessible
-manner. In order to build intuition for myself and the reader, nearly all of the
-formulas and proofs in this essay are of my own independent derivation, with
-some external sources used for inspiration and guidance, which should hopefully
-demonstrate that one does not need a tertiary education degree to tackle this
-topic holistically. \\
+Additionally, from online forums, I have noticed that developers working on the
+creative part of their work often do not understand mathematical concepts
+underpinning tools they work with daily, and this leads to ambiguity and
+confusion when communicating with other developers, or while working. Often, I
+feel like this could be due to the exaggerated barrier of entry to learning the
+underlying mathematics, leaving many afraid to investigate in the first place. I
+hope that this work will help me and others in demistyfing how quaternions and
+rotation matrices work, in addition to showing why and when they are useful in
+an accessible manner. In order to build intuition for myself and the reader,
+nearly all of the formulas and proofs in this essay are of my own independent
+derivation, with some external sources used for inspiration and guidance, which
+should hopefully demonstrate that one does not need a tertiary education degree
+to investigate this topic holistically, and I find this very important to making
+mathematics accessible to everyone. \\
 
 In order to answer the question, I first build intution for the reader by
 examining how rotation works in two dimensions by introducing the concept of
 rotating axes using two dimensional transformation matrices, and then extend
 this to the three dimensions. I then introduce and evaluate the concept of Euler
 angles and link them with how they can be used to construct 3D rotation
-matrices. Following this, I introduce the concept of quaternions from Hamilton's
+matrices. Following this, I introduce the concept of quaternions from their
 original definition and independently develop fundemental rules for operations
 with them. Finally, I investigate how quaternions can be used to represent 3D
 rotation and compare various aspects of their performance to rotation matrices
-constructed from Euler angles in order to draw conclusions about whether one of
+constructed from Euler angles in order to draw conclusions about whether one
 could supersede the other in representing 3D rotation.
 
 \pagebreak
@@ -102,13 +103,13 @@ It is worthwile conceptually exploring what happens in two dimensions first, as
 this will introduce valuable concepts which will help with understanding how
 three dimensional rotation matrices work. \\
 
-Let 2D points be represented as a point vector of the form $\vec{v} =
+Let 2D points be represented as a position vector of the form $\vec{v} =
         \begin{bmatrix}x \\ y\end{bmatrix}$ where $x$ and $y$ represent the x
         and y coordinates of the point respective to the origin. \\
 
 By representing the points as vectors, rotation of a point around the origin
-would be equrivalent to rotating the vector. Consider the rotation of point (1,
-0) by 45 degrees anti-clockwise:
+would be equrivalent to rotating its position vector. Consider the rotation of
+point (1, 0) by 45 degrees anti-clockwise:
 
 \begin{figure}[H]
     \centering
@@ -142,30 +143,37 @@ would be equrivalent to rotating the vector. Consider the rotation of point (1,
 
         % Draw blue vector arrow [0.7071, 0.7071]
         \draw[->, blue, line width=0.6mm, >={stealth}] (0, 0) -- (R) node[above right]
-            {$\begin{bmatrix}0.7071 \\ 0.7071\end{bmatrix}$};
+            {$\begin{bmatrix}\cos 45^\circ \\ \sin 45^\circ\end{bmatrix}$};
 
         \draw[->, black!60!green, line width=0.6mm, >={stealth}] (0, 0) -- (-0.7, 1.2) node[above]
             {$\begin{bmatrix}? \\ ?\end{bmatrix}$};
 
     \end{tikzpicture}
     \caption{ Apparent rotation of red vector $\begin{bmatrix}1 \\ 0\end{bmatrix}$ by
-        45\textdegree \space anti-clockwise to blue vector }
+        45\textdegree \space anti-clockwise to form blue vector }
     \label{2d_rot}
 \end{figure}
 
-From Figure \ref{2d_rot}, it may seem like calculating 2D rotation is trivial by
-using the trigonometric functions: for any angle $\theta$, the rotation of
-$\begin{bmatrix}1 \\ 0\end{bmatrix}$ is equal to $\begin{bmatrix}\cos\theta \\
+From Figure \ref{2d_rot}, it becomes evident that rotating the red vector of
+length $1$ that lies along the $x$ axis around a unit circle by $\theta$ degrees
+anti-clockwise is equrivalent to finding a point on the unit circle at angle of
+$\theta$ degrees to the horizontal. Hence, for any angle $\theta$, the rotation
+of $\begin{bmatrix}1 \\ 0\end{bmatrix}$ is equal to $\begin{bmatrix}\cos\theta
+\\
         \sin\theta\end{bmatrix}$. \vspace{0.2cm}
 
 Indeed, this is the case for the simple example of a 2D unit vector above, but
-the applicability of using simple trigonometric functions for rotation quickly
-breaks down once the complexity of the problem is increased. For example, if we
-wished to rotate a non-unit vector to the point where it is colinear with
-another, or wished to apply multiple rotations one after the other. \\
+the applicability of using trigonometric functions to individually compose a
+vector's components grows increasingly limited as the complexity of the problem
+at hand increases. For example, consider the case where one would like to rotate
+several thousand, or millions of points by the same angle, as is often the case
+in computer graphics. In this case, it would be inefficient (and computationally
+expensive) to calculate the sine and cosine of the angle to each point
+individually, and this operation would also be equally expensive to reverse for
+a large number of points. \\
 
 Linear transformation using matrices elegantly deals with these problems by
-introducing one concept - instead of transforming each individual vector,
+introducing one concept - instead of transforming each individual vector, we can
 transform the axes themselves. \\
 
 \begin{figure}[H]
@@ -219,35 +227,36 @@ transform the axes themselves. \\
 
     \vspace{1.5cm}
     \caption{ Overlay of new cartesian plane (blue) with axes $x'$ and $y'$
-        rotated 30\textdegree \space anti-clockwise relative to the original. }
+        rotated 30\textdegree \space anti-clockwise relative to the original
+        axes. }
     \label{2d_axis_rot}
 \end{figure}
 
 In Figure \ref{2d_axis_rot}, the blue vector's coordinates on the rotated axes
-are identical to the red vector's coordinates on the original - both are
+are identical to the red vector's coordinates on the original axes - both are
 $\begin{bmatrix}1 \\ 0\end{bmatrix}$ in their respective axes. In fact, any one
 point on the original axis has a counterpart on the rotated axis which
 corresponds to the rotation of that point about the origin by $30$\textdegree.
-If one examines the coordinates of the blue vector $b$ on the original axes, it
-becomes evident that
+If we examine the coordinates of the blue vector $b$ on the original axes, we
+find that
 $
     \vec{b}
     =
     \begin{bmatrix}
-        0.8660 \hdots \\ 0.5
+        \frac{\sqrt{3}}{2}\\ \frac{1}{2}
     \end{bmatrix}
     =
     \begin{bmatrix}
         \cos 30^\circ \\
         \sin 30^\circ
     \end{bmatrix}
-$, which aligns with findings from the trigonometric model. \\
+$, which aligns with findings from the trigonometric method explored earlier above. \\
 
-Another invaluable benefit of this method is that one may also choose to rotate
-the axes about a different point to the origin, and observe the correct
-off-centric rotations for vectors without any changes to how the model is
-evaluated. Extrapolating this to three dimensions yields immeasurable savings in
-complexity and extra calculations which are expensive for computers to do. \\
+In practice, the idea of transforming the axes is integral to the speed of many
+3D applications, because linear transformation matrices are not limited to just
+rotation. As we will soon find, it is possible to scale, warp and reflect a set
+of point vectors with the very same mathematical method, at no extra
+computational expense.
 
 \begin{figure}[H]
     \centering
@@ -319,39 +328,48 @@ complexity and extra calculations which are expensive for computers to do. \\
 
 Figure \ref{2d_axis_shear} depicts what is known as a "shear". It occurs when
 each axis is rotated by a different angle, and results in warping of the
-transformed vectors, evident by the asymmetric appearance of the graph. If you
-were interested in going beyond rotation, there is an opportunity to translate,
-dilate and shear the axes to achieve various effects like the one depicted.\\
+transformed vectors, evident by the asymmetric appearance of the graph. Using a
+particular set of shears, it is technically possible to skew, flip, scale and
+even rotate any set of points in 2D space. As an aside, one might find it
+interesting that rotations are nothing more than two shears applied on different
+axes by an equal angle. \\ 
 
 The elegance in this model comes from how one such transformation is actually
-computed. The first step to this is determining the direction and dilation of the
-transformed axes by examining what happens to the vectors $\begin{bmatrix} 1 \\
+computed. The first step to this is determining the direction and dilation of
+the transformed axes by examining what one desires to happen to the vectors
+$\begin{bmatrix} 1 \\
         0\end{bmatrix}$ and $\begin{bmatrix} 0 \\
-        1\end{bmatrix}$ after the transformation. If the magnitude of any one of these
-vectors changes, that means that the respective axis has been dilated by a
-factor of the magnitude. If the direction changes, that means that that axis has
-been rotated. By knowing the final position of these two vectors after a
-transformation, the transformation that took place can be reconstructed and
-applied to more points. \\
+        1\end{bmatrix}$ after the transformation. Because these vectors each lie
+in their respective axis, if the magnitude of any one of them changes, that
+means that that axis has been dilated by a factor of the magnitude. If the
+direction changes, that means that that axis has been rotated. By knowing the
+final position of these two vectors after a transformation, the transformation
+that took place can be reconstructed and applied to more points. This means that
+if one computes the transformation of just these two vectors once, the
+transformation can be inexpensively reapplied to a very large number of points,
+and this is the key reason why transformation matrices are used today.
 
 \pagebreak
 
-The extremely useful tool that bridges the gap between this theory of axis
-shifting and mathematics is called a transformation matrix. 2D Transformation
-matrices are constructed by taking the vectors found above and storing them in a
-single 2$\times$2 matrix:
+Now that we understand the theory of axis shifting, we can look at how this can
+be represented mathematically using ``transformation matrices". Effectively,
+transformation matrices represent a transformation which can be applied to a set
+of points. 2D transformation matrices are constructed by taking the ``axial
+vectors" discussed above and storing them in a 2$\times$2 matrix. This allows us
+to represent any 2D transformation as a matrix multiplication. \\
 
-Let $x$ be the post-transform position of $\begin{bmatrix} 1 \\ 0
-    \end{bmatrix}$, where $\vec{x} = \begin{bmatrix} x_x \\ x_y
-    \end{bmatrix}$, and let $y$ be the post-transform position of
-$\begin{bmatrix} 0 \\ 1 \end{bmatrix}$, where $\vec{y} =
-    \begin{bmatrix}y_x \\ y_y \end{bmatrix}$. The transformation matrix
-$M$ is described by $ M = \begin{bmatrix} x_x & y_x \\
+Let $\vec{x}$ be the position of $\begin{bmatrix} 1 \\ 0
+    \end{bmatrix}$ after transformation: $\vec{x} = \begin{bmatrix} x_x \\ x_y \end{bmatrix}$ 
+    
+Let $\vec{y}$ be the position of $\begin{bmatrix} 0 \\ 1\end{bmatrix}$ after the transformation: $\vec{y} =
+    \begin{bmatrix}y_x \\ y_y \end{bmatrix}$
+    
+The transformation matrix $M$ is therefore described by $M = \begin{bmatrix} x_x & y_x \\
                 x_y & y_y
     \end{bmatrix}$.\\
 
-The transformation $T_M(\vec{v})$ of $\vec{v}$ by matrix $M$ can then be
-described as
+The transformation $T_M(\vec{v})$ of point vector $\vec{v} = \begin{bmatrix}v_x \\ v_y \end{bmatrix}$ using $M$ can then
+be described by
 
 \begin{align*}
     T_M(\vec{v}) = M\vec{v} = 
@@ -372,26 +390,148 @@ described as
 
 If $\vec{x}$ and $\vec{y}$ do not change after a transformation, they would be
 equal to $\begin{bmatrix} 1 \\ 0 \end{bmatrix}$ and $\begin{bmatrix} 0 \\ 1
-    \end{bmatrix}$ respectively. From this, a transformation matrix which does nothing
-(called the "identity") $M_0$ can be constructed in the form of
+\end{bmatrix}$ respectively. In this state, they are called the ``identity
+vectors'' $\vec{x}_i$ and $\vec{y}_i$. From this, a transformation matrix which
+does nothing (similarly called the ``identity matrix'') $I$ can be constructed in the form
 $
-    M_0 = \begin{bmatrix}
+    I = \begin{bmatrix}
         1 & 0 \\
         0 & 1
     \end{bmatrix}
-$. In this case, $T_{M_0}(\vec{v}) = \begin{bmatrix}
+$. In this case, $
+T_{I}(\vec{v}) 
+= \begin{bmatrix}
+    x_{ix} & y_{ix} \\
+    x_{iy} & y_{iy}
+\end{bmatrix}
+\begin{bmatrix}
+    v_x \\
+    v_y
+\end{bmatrix}
+= \begin{bmatrix}
+   1 & 0 \\
+   0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+    v_x \\
+    v_y
+\end{bmatrix}
+= \begin{bmatrix}
         (1)v_x + (0)v_y \\
-        (0)v_x + (1)v_y \end{bmatrix} = \begin{bmatrix} v_x \\
-        v_y
-    \end{bmatrix} = \vec{v}$ \\\\
+        (0)v_x + (1)v_y 
+\end{bmatrix}
+= \begin{bmatrix}
+    v_x \\
+    v_y
+\end{bmatrix} 
+= \vec{v}$. \\\\
 
-Considering the point $\begin{bmatrix} 1 \\ 0 \end{bmatrix}$ on a unit circle,
-a rotation by $\theta$ would be represented as $\begin{bmatrix} \cos\theta \\
-\sin\theta \end{bmatrix}$. Likewise, the rotation of the point $\begin{bmatrix}
-0 \\ 1 \end{bmatrix}$ is equrivalent to $\begin{bmatrix} -\sin\theta \\
-\cos\theta \end{bmatrix}$. Hence, a general 2D transformation matrix $R(\theta)$
-can be constructed so that it rotates the 2D axes by any angle $\theta$. This is
-what is known as a rotation matrix.
+\pagebreak
+
+    \begin{figure}[H]
+        \centering
+
+        \subfloat[\centering Rotation of $\begin{bmatrix}1 \\ 0\end{bmatrix}$ by
+        angle $\theta$ from the x-axis.]{
+            \begin{tikzpicture}[x=1.84cm,y=1.84cm]
+                \coordinate (Origin) at (0, 0);
+                \coordinate (R) at (0.7071, 0.7071);
+                \coordinate (P) at (1, 0);
+        
+                % Draw grid
+                \draw[gray!10, very thin, step=0.1] (-2, -2) grid (2, 2);
+                \draw[gray!50, very thin, step=1] (-2, -2) grid (2, 2);
+        
+                \draw[gray!50, dashed] (0, 0) circle (1);
+        
+                % Draw tick marks on the axes
+                \foreach \x in {-2, -1, 1, 2}
+                \draw (\x, 2pt) -- (\x, -2pt) node[below] {\small $\x$};
+                \foreach \y in {-2, -1, 1, 2}
+                \draw (2pt, \y) -- (-2pt, \y) node[left] {\small $\y$};
+        
+                \node[below left] at (0, 0) {$0$};
+        
+                % Draw Cartesian axes
+                \draw[<->, thick] (-2, 0) -- (2, 0) node[right] {$x$};
+                \draw[<->, thick] (0, -2) -- (0, 2) node[above] {$y$};
+        
+                \pic[draw, angle radius=0.75cm, angle eccentricity=1.4, "$\theta$"] {angle=P--Origin--R};
+        
+                % Draw red vector arrow [1, 0]
+                \draw[->, red, line width=0.6mm, >={stealth}] (0, 0) -- (P) node[above right] {$\begin{bmatrix}1 \\ 0\end{bmatrix}$};
+        
+                % Draw blue vector arrow [0.7071, 0.7071]
+                \draw[->, blue, line width=0.6mm, >={stealth}] (0, 0) -- (R) node[above]
+                    {$\begin{bmatrix}\cos \theta \\ \sin \theta\end{bmatrix}$};
+        
+            \end{tikzpicture}
+        }
+        \qquad
+        \subfloat[\centering Rotation of $\begin{bmatrix}0 \\ 1\end{bmatrix}$ by
+        angle $\theta$ from the y-axis.]{
+            \begin{tikzpicture}[x=1.84cm,y=1.84cm]
+                \coordinate (Origin) at (0, 0);
+                \coordinate (R) at (-0.7071, 0.7071);
+                \coordinate (P) at (0, 1);
+                \coordinate (S) at (1, 0);
+        
+                % Draw grid
+                \draw[gray!10, very thin, step=0.1] (-2, -2) grid (2, 2);
+                \draw[gray!50, very thin, step=1] (-2, -2) grid (2, 2);
+        
+                \draw[gray!50, dashed] (0, 0) circle (1);
+        
+                % Draw tick marks on the axes
+                \foreach \x in {-2, -1, 1, 2}
+                \draw (\x, 2pt) -- (\x, -2pt) node[below] {\small $\x$};
+                \foreach \y in {-2, -1, 1, 2}
+                \draw (2pt, \y) -- (-2pt, \y) node[left] {\small $\y$};
+        
+                \node[below left] at (0, 0) {$0$};
+        
+                % Draw Cartesian axes
+                \draw[<->, thick] (-2, 0) -- (2, 0) node[right] {$x$};
+                \draw[<->, thick] (0, -2) -- (0, 2) node[above] {$y$};
+        
+                \pic[draw, angle radius=0.75cm, angle eccentricity=1.4, "$\theta$"] {angle=P--Origin--R};
+                \pic[draw, dashed, angle radius=0.5cm, angle eccentricity=1.6,
+                "$\frac{\pi}{2} + \theta$", pic text options={shift={(0.65cm,-0.2cm)}}] {angle=S--Origin--R};
+        
+                % Draw red vector arrow [1, 0]
+                \draw[->, red, line width=0.6mm, >={stealth}] (0, 0) -- (P) node[above right] {
+                    $\begin{bmatrix}1 \\ 0\end{bmatrix}$};
+        
+                % Draw blue vector arrow [0.7071, 0.7071]
+                \draw[->, blue, line width=0.6mm, >={stealth}] (0, 0) -- (R)
+                node[above left, text width=3cm, align=right] {
+                    $\begin{bmatrix}
+                        \cos (\frac{\pi}{2} + \theta) \\ 
+                        \sin (\frac{\pi}{2} + \theta)
+                    \end{bmatrix}$
+                    $= \begin{bmatrix} -\sin\theta \\
+                        \cos\theta \end{bmatrix}$
+                };
+        
+            \end{tikzpicture}
+        }
+
+        \caption{Rotation of the 2D axes by angle $\theta$ anti-clockwise.}
+        \label{2d_ax_rot}
+    \end{figure}
+
+As seen in Figure \ref{2d_ax_rot}, on a unit circle, a counter-clockwise
+rotation of the identity position vector $\vec{x}_i = \begin{bmatrix} 1 \\ 0
+\end{bmatrix}$ by $\theta$ would be represented as $\vec{x} = \begin{bmatrix}
+\cos\theta \\
+\sin\theta \end{bmatrix}$. Likewise, the rotation of the identity position
+vector $\vec{y}_i = \begin{bmatrix} 0 \\ 1 \end{bmatrix}$ would be equrivalent to first
+rotating by $\frac{\pi}{2}$ and then by $\theta$, hence $\vec{y} =
+\begin{bmatrix} \cos (\frac{\pi}{2} + \theta) \\
+    \sin (\frac{\pi}{2} + \theta) \end{bmatrix} = \begin{bmatrix} -\sin\theta \\
+\cos\theta \end{bmatrix}$. Hence, a 2D transformation matrix $R(\theta)$ can be
+constructed so that it rotates the 2D axes by an angle $\theta$ using $\vec{x}$
+and $\vec{y}$. This is what is known as a rotation matrix.
 
 \begin{align*}
     R(\theta) & = \begin{bmatrix}
@@ -406,17 +546,18 @@ multiple transformation matrices sequentially. For example, you might choose to
 apply a shear or a scale to your points before rotating them. This property
 applies to both two and three dimensional transformation matrices. Because of
 this versatility, transformation matrices are very easy to work with and
-integrate into more complex application. \\
+integrate into more complex applications where multiple transformations need to
+be chained. \\
 
 It is important to note that matrix multiplication is not commutative, and hence
 it is important to always multiply matrices in a right-to-left order: if one
 wanted to apply the linear transformations $T_1 \to T_2 \to T_3$ on vector
 $\vec{v}$, the correct multiplication would be $T_3T_2T_1\vec{v}$.
-
 \pagebreak
 \subsection{In three dimensions}
-Now that we have established basic intuition on what 2D matrices actually do, we
-can extend the established observations to three dimensions. \\
+Now that we have established basic intuition on what 2D matrices transformation
+allow us to do, we can extend the established observations to three dimensions.
+\\
 
 In 3D, there are now three axes which must be kept track of:
 \begin{itemize}[leftmargin=2cm]
@@ -455,11 +596,13 @@ direction, signifying reoriented axes.
               \end{bmatrix}
 \end{align*}
 
-Changing the magnitude and/or direction of these vectors results in various effects
-on the 3D space, similar to how this works in two dimensions. Individually
-changing any one or two of these vectors results in the three dimensional
-equrivalent of shear called "deformation". This property is often used in 3D
-animation to compress or stretch objects -- a bouncing ball, for example. \\
+Changing the magnitude and/or direction of these vectors results in various
+effects on the 3D space, similar to how this works in two dimensions.
+Individually changing any one or two of these vectors results in the three
+dimensional equrivalent of shear called ``deformation" as the three axes would
+no longer be orthogonal, therefore appearing to ``crush'' points within them.
+This property is often used in 3D animation to compress or stretch objects -- a
+ball hitting a wall, or human skin stretching, for example. \\
 
 As before, constructing a matrix out of these vectors allows us to leverage
 matrix multiplication to transform points. A 3$\times$3 matrix $M$ can now be
@@ -503,15 +646,16 @@ For a transformation $T_M(\vec{v})$ on $\vec{v} = \begin{bmatrix}
 \end{align*}
 
 Now that we are familiar with the form of a 3D rotation matrix, we can move on
-to methods of constructing one. Like observed in the 2D case, a rotation could
-affect more than one axis, and so it is important to consider the matrix as a
-whole. Historically, many different ways of constructing rotation matrices have
-been shown, each with their benefits and downsides. In a sense, rotation
-matrices are not an entirely independent method of performing rotation, but are
-rather an underlying infrastructure for other methods to use, which is
-significant because it implies that comparison of rotation matrices to other
-rotation methods alone is nonsensical, and that the method through which the
-matrix is constructed is far more relevant for comparison against.
+to methods of constructing one. In a sense, one could say simply knowing how to
+use a rotation matrix to transform points is rather useless without knowing how
+to construct the rotation matrix in the first place. Historically, many
+construction methods have been invented and used widely, each with their own
+benefits and shortcomings.
+
+It is interesting to note that while I initially wanted to compare rotation
+matrices as a whole to quaternion rotation, this fact occurred to me and I
+realised that it would be more appropriate to compare the most popular
+construction method of rotation matrices to quaternion rotation instead. 
 
 \subsection{Construction from Euler angles}
 
@@ -519,11 +663,15 @@ matrix is constructed is far more relevant for comparison against.
 In real life, it is practical to represent rotations with easily measurable
 metrics, like angles. Aircraft and watercraft make extensive use of yaw, pitch
 and roll angles in instrumentation to aid their pilots in judging the
-orientation of the craft. Yaw indicates a horizontal swivel, or a "heading",
-pitch indicates the angle of the nose relative to the horizon, and roll
+orientation of the craft. Yaw indicates the left-right angle of the nose,
+rotating about the vertical axis, somewhat like the ``heading'' of aircraft. A
+yaw of 0\textdegree\space indicates the nose is pointing directly north, and a
+yaw of 90\textdegree\space indicates the nose is pointing directly east, etc.
+Pitch indicates the angle of the nose relative to the horizon, and roll
 indicates how much the plane is turned about the forward axis. Figure
 \ref{yawpitchroll} demonstrates this in terms of an $x$, $y$ and $z$ axis. In
-aircraft, $y$ axis here can be considered as the "front" of the craft. \\
+aircraft, $y$ axis here can be considered the ``front'' of the craft, the $z$
+axis the ``up'' direction and the $x$ axis the ``right'' direction. \\
 
 \begin{figure}[H]
     \centering
@@ -561,7 +709,10 @@ aircraft, $y$ axis here can be considered as the "front" of the craft. \\
 Euler angles are based around this concept. A set of Euler angles is a 3D vector
 containing the yaw, pitch and roll of an object around a reference frame. In the
 example of aircraft, the reference frame is usually the surface of the Earth. In
-space, it is usually a prominent constellation or celestial object. \\
+space, it is usually a prominent constellation or celestial object. If one
+wishes to encode a rotation as a set of Euler angles, one just needs to measure
+the angles between the rotated axes and the original axes of the reference
+frame. \\
 
 As this system of representing rotation is simple, measurable and intuitive for
 humans to use, one of the main ways of constructing a rotation matrix is through
@@ -570,10 +721,11 @@ Euler angles.
 \pagebreak
 \subsubsection{Deriving rotation matrices for each angle}
 \label{section_deriving_rot_for_each_angle}
-Consider rotating the 3D identity axes $\vec{x}_0$, $\vec{y}_0$ and $\vec{z}_0$
-by $\theta$ around the X axis. Let the matrix that describes this rotation in
-terms of $\theta$ be $R_x(\theta)$. After the transformation, let the identity
-vectors' new positions be $\vec{x}_r$, $\vec{y}_r$ and $\vec{z}_r$. \\
+Consider rotating the 3D identity axes with vectors $\vec{x}_0$, $\vec{y}_0$ and
+$\vec{z}_0$ by $\theta$ around the X axis. Let the matrix that describes this
+rotation in terms of $\theta$ be $R_x(\theta)$. After the transformation, let
+the identity vectors' new positions be $\vec{x}_r$, $\vec{y}_r$ and $\vec{z}_r$.
+\\
 
 % TODO: insert figure
 
@@ -586,8 +738,8 @@ vectors' new positions be $\vec{x}_r$, $\vec{y}_r$ and $\vec{z}_r$. \\
         \coordinate (Z) at (0,0,3);
 
         \draw[->, red] (0,0,0) -- (X) node[right] {$\vec{x}_r = R_{x}(\theta)\cdot \vec{x}_0 = x_0$};
-        \draw[->, blue] (0,0,0) -- (Y) node[right] {$y_0$};
-        \draw[->, black!60!green] (0,0,0) -- (Z) node[above] {$z_0$};
+        \draw[->, blue] (0,0,0) -- (Y) node[right] {$\vec{y}_0$};
+        \draw[->, black!60!green] (0,0,0) -- (Z) node[above] {$\vec{z}_0$};
 
         \begin{scope}[canvas is zy plane at x=0]
             \draw[dashed, darkgray] (0,0) circle (3);
@@ -606,7 +758,15 @@ vectors' new positions be $\vec{x}_r$, $\vec{y}_r$ and $\vec{z}_r$. \\
     \label{3d_euler_rot_x}
 \end{figure}
 
-In Figure \ref{3d_euler_rot_x}, the rotation $R_x(\theta)$ could be represented
+Considering the components of $\vec{x}_r$, $\vec{y}_r$ and $\vec{z}_r$,
+
+\begin{align*}
+    \vec{x}_r = \begin{bmatrix} {x}_{rx} \\ {x}_{ry} \\ {x}_{rz} \end{bmatrix} \quad
+    \vec{y}_r = \begin{bmatrix} {y}_{rx} \\ {y}_{ry} \\ {y}_{rz} \end{bmatrix} \quad
+    \vec{z}_r = \begin{bmatrix} {z}_{rx} \\ {z}_{ry} \\ {z}_{rz} \end{bmatrix}
+\end{align*}
+
+Hence, in Figure \ref{3d_euler_rot_x}, the rotation $R_x(\theta)$ could be represented
 as
 
 \begin{align*}
@@ -617,9 +777,9 @@ as
     \end{bmatrix}
 \end{align*}\\
 
-From Figure \ref{3d_euler_rot_x} it becomes apparent that points colinear with
-$\vec{x}_0$ do not move at all, because in this case the rotation is happening
-along the X-axis. Hence,
+From Figure \ref{3d_euler_rot_x} it becomes apparent that points that lie along
+$\vec{x}_0$ do not move at all, because the rotation is happening around
+$\vec{x}_0$ in the first place. Hence,
 
 \begin{align*}
     \vec{x}_r = \vec{x}_0 = \begin{bmatrix} 1 \\
@@ -635,7 +795,7 @@ components. The rotation of $\vec{z}_r$ can be derived similarly.
     \vec{y}_r = \begin{bmatrix} 0 \\ \cos\theta \\ \sin\theta
                       \end{bmatrix}
     \quad
-    \vec{x}_r
+    \vec{z}_r
     = \begin{bmatrix}
           0           \\
           -\sin\theta \\
@@ -657,8 +817,8 @@ $R_x(\theta)$ for rotations around the X-axis.
 
 A  similar process can be followed to derive the rotation matrices by the Y and
 Z axes, so it has been omitted for brevity. The only thing that changes in the
-derivation process is that the plane of the circle follows the two axes perpendicular to
-the rotation axis.
+derivation process is that the plane of the circle always lies in the plane
+described by the two axes perpendicular to the rotation axis.
 
 \begin{align*}
     R_y(\theta) = \begin{bmatrix}
@@ -676,11 +836,11 @@ the rotation axis.
 
 \subsubsection{Multiplication}
 
-For the Euler angles $\alpha$, $\beta$ and $\gamma$ representing yaw, pitch and
-roll respectively, it is now possible to compute a general rotation matrix by
-first constructing each individual matrix, then multiplying them. Effectively,
-this applies the rotation $R_x(\alpha)$ followed by $R_y(\beta)$ and finally
-$R_z(\gamma)$.
+It is now possible to compute a rotation matrix in terms of the Euler angles
+$\alpha$, $\beta$ and $\gamma$ (representing pitch, roll and yaw respectively)
+by first constructing each individual matrix, then multiplying them.
+Effectively, this applies the rotation $R_x(\alpha)$ followed by $R_y(\beta)$
+and finally $R_z(\gamma)$.
 
 \begin{align*} \\
     R(\alpha, \beta, \gamma) & = R_z(\gamma) R_y(\beta) R_x(\alpha)                                                                                                \\
@@ -761,20 +921,24 @@ $R(\theta) =
 By inspecting this matrix, we find that:
 
 \begin{itemize}[leftmargin=2cm]
-    \item $\vec{x_0}$ will always transform to $-\vec{z_0}$. This means that
-    this is the axis around which rotation occurs by angle $\theta$.
+    \item $\vec{x_0}$ will always transform to $\begin{bmatrix} 0 \\ 0 \\ -1
+    \end{bmatrix} = -\vec{z_0}$. This means that this is the axis around which
+    rotation occurs by angle $\theta$ as it remains constant irrespective of the
+    value of $\theta$.
     \item $\vec{y}$ and $\vec{z}$ revolve around a unit circle in the YX plane
-    by angle $\theta$.
-    \item This matrix is entirely in terms of $\theta$. It does not matter
-    whether the $\alpha$ or $\gamma$ is changed, the resulting rotation will always
-    be around the $-\vec{z_0}$ axis.
+    by angle $\theta$ perpendicularly to the axis of rotation of $-\vec{z_0}$,
+    as seen before in Figure \ref{3d_euler_rot_x}.
+    \item This matrix is entirely in terms of $\theta$. When either $\alpha$ or
+    $\gamma$ is changed, the resulting rotation is always around the
+    $-\vec{z_0}$ axis as it is independent of $\theta$.
 \end{itemize}
 
 Hence, this shows that when $\beta = \frac{\pi}{2}$, the rotation matrix
 actually loses one degree of rotational freedom entirely as $\alpha$ and
-$\gamma$ describe rotation about the same axis. In fact, the same can be shown
-for the case where one of $\alpha$, $\beta$ or $\gamma$ is equal to
-$\frac{a\pi}{2}$ where $a = (2b+1)$, $b \in \mathbb{Z}$. \\
+$\gamma$ describe rotation about the same axis because they both contribute to
+the value of $\theta$. In fact, the same can be shown for the case where one of
+$\alpha$, $\beta$ or $\gamma$ is equal to $\frac{(2b+1)\pi}{2}$ where $b \in
+\mathbb{Z}$. \\
 
 This phenomenon is known as "gimball lock". It is widely considered to be one of
 the largest issues with using Euler angles for rotation. It is significant
@@ -811,11 +975,11 @@ rigorously representing 3D rotations. \\
 \section{Improving on Euler angles with Quaternions}
 In 1843, Irish mathematician Sir William Rowan Hamilton proposed an alternative
 way to represent 3D rotation by using four dimensional imaginary numbers called
-"quaternions". Quaternions allow us to rotate any 3D point vector around any 3D
-axis by a certain angle with the power of four dimensions (Dam, Koch and Lillholm, 1998). This method of
-rotation is not anything special in particular, in fact, rotating around the X,
-Y and Z axes individually has already been explored in section
-\ref{section_deriving_rot_for_each_angle}. \\
+"quaternions". Quaternions allow us to rotate any 3D position vector around any
+3D axis by a certain angle with the power of four dimensions (Dam, Koch and
+Lillholm, 1998). Rotation about an axis is not anything special in particular,
+in fact, rotating around the X, Y and Z axes individually has already been
+explored in section \ref{section_deriving_rot_for_each_angle}. \\
 
 Quaternions, like rotation matrices constructed from Euler angles, have seen
 numerous applications in pretty nearly all fields of science and engineering
@@ -918,7 +1082,9 @@ matrices, quaternion multiplication by other quaternions is not commutative,
 that is, it can be the case that $q_1q_2 \neq q_2q_1$ where $ q_1,q_2 \in
 \mathbb{H}$. For example, it is seen above that while $ij = k$, $ji = -k$. \\
 
-The multiplication table of basic quaternions is hence formed:
+The multiplication table of basic quaternions is hence formed, where the column
+represent the left operand and the row represents the right operand in
+multiplication.
 
 \begin{center}
     \doublespacing
@@ -995,6 +1161,7 @@ Suppose one was to multiply a quaternion $q$ by its conjugate $q^*$,
          & + abi + b^2 - bck + bdj                           \\
          & + acj + bck + c^2 - cdi                           \\
          & + adk - bdj + cdi + d^2                           \\
+         &\text{Cancelling like terms,}                      \\
          & = a^2 + b^2 + c^2 + d^2                           \\
          \\
          & \text{Additionally, given } a, b, c, d \in \mathbb{R} \\
@@ -1010,7 +1177,7 @@ The norm of a quaternion $q$ is defined as $|q| = \sqrt{qq^*} = \sqrt{a^2 + b^2
 + c^2 + d^2}$, corresponding to the length of the quaternion in 4D space, coming
 from the extension of the Pythagorean theorem in four dimensions. A quaternion
 of norm $1$ is called a unit quaternion. It is hence possible to normalize a
-quaternion $q$ into by dividing it by its norm. If $\hat{q}$ represents the
+quaternion $q$ by dividing it by its norm. If $\hat{q}$ represents the
 normalization of $q$, $q \in \mathbb{H}$, $\hat{q} = \frac{q}{|q|}$. \\
 
 % https://www.quora.com/How-do-I-find-the-inverse-of-a-quaternion
@@ -1028,11 +1195,10 @@ quaternion can be computed using the previosuly established rules.
 \end{align*}
 
 In terms of 3D rotations, the inverse of a quaternion allows one to effectively
-"reverse" or "undo" a rotation. In this way, inverses of rotation matrices (and
-not only those constructed from Euler angles), exibit similarity to inverses of
-quaternions.
+"reverse" or "undo" a rotation similarly to how multiplying by the inverse of a
+transformation matrix reverses the transformation.
 
-\subsection{Rotating point vectors}
+\subsection{Rotating position vectors}
 Although quaternions harbor many different interesting properties, from the very
 beginning, Hamilton defined them out of the need for unit quaternions to
 represent 3D rotation in a straightforward manner.
@@ -1042,7 +1208,7 @@ example $\vec{v} = \begin{bmatrix} x \\ y \\ z \end{bmatrix}$ and constructing a
 quaternion $p$ out of it such that $p = xi + yj + zk$. As the real part $\Re(p)$
 of $p$ is zero, $p$ is called a "pure quaternion". \\
 
-Like with rotation matrices, one can then construct a "rotation quaternion" $q =
+Like with rotation matrices, one can then construct a ``rotation quaternion" $q =
 a + bi + cj +dk$ that represents a rotation about an axis $\vec{g} =
 \begin{bmatrix} b \\ c \\ d \end{bmatrix}$ by an angle $\theta$. % The axis
 % represents a direction in 3D space, and is hence a unit vector. That is,
@@ -1124,7 +1290,7 @@ Evaluating $r = qpq^{-1}$, if $q = a_q + b_qi + c_qj + d_qk$
 \end{align*}
 
 Knowing that $qpq*$ must be a pure quaternion, one can extract the final rotated
-point vector $\vec{r}$ from $\Im(qpq*)$.
+position vector $\vec{r}$ from $\Im(qpq*)$.
 
 \begin{align*}
     &\text{Given} \\
