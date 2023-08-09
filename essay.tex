@@ -23,9 +23,8 @@
 % \pagecolor[rgb]{0.128,0.128,0.128}
 % \color[rgb]{1,1,1}
 \title{\vspace{-2cm}Applications of Quaternions in 3D Rotation}
-\author{Martin Velikov}
-\date{To what extent can quaternions supersede rotation matrices constructed from Euler
-    angles in representing 3D rotation?}
+% \author{Martin Velikov}
+\date{}
 
 \begin{document}
 \maketitle
@@ -33,7 +32,8 @@
 
 \pagebreak
 
-\section{Introduction}
+\section*{Introduction}
+\addcontentsline{toc}{section}{Introduction}  
 Historically, mathematicians have endeavoured to accurately describe the real
 world around us using mathematics. One of the most fundamental necessities of
 working with geometry applicable to real life is the ability to reason about
@@ -49,8 +49,9 @@ transitioning from a two dimensional space to three dimensional is the problem
 of rotation. Indeed, there currently exist several competing mathematical models
 for 3D rotation in common use which bear their own strengths and weaknesses. Of
 these, some of the most common are 3D ``rotation matrices'' (which are usually
-constructed from ``Euler angles"), and ``quaternions'' (Huynh, 2009).\\
-
+constructed from ``Euler angles"), and ``quaternions'' (Huynh, 2009). Hence, I
+have chosen the research question ``To what extent can quaternions supersede
+rotation matrices constructed from Euler angles in representing 3D rotation?"\\
 
 This investigation aims to explore the extent to which quaternions can perform
 better than rotation matrices constructed from Euler angles in representing 3D
@@ -1220,15 +1221,21 @@ Considering that $q$ is a unit quaternion,
 \begin{align*}
     &|q| = 1 = |q|^2 = a^2 + b^2 + c^2 + d^2 \\
     &\text{Given that } \sin^2\theta + \cos^2\theta = 1, \\
-    &a^2 + (b^2 + c^2 + d^2) = 1 = \sin^2\theta +c \cos^2\theta \\
+    &a^2 + (b^2 + c^2 + d^2) = 1 = \sin^2\theta + \cos^2\theta \\
     &\text{From this, one could infer that} \\
-    &a = \cos\theta, \sqrt{b^2 + c^2 + d^2} = |\vec{g}| = \sin\theta \quad or \quad a = \cos\theta, \sqrt{b^2 + c^2 + d^2} = |\vec{g}| = \sin\theta 
+    &a = \cos\theta, \sqrt{b^2 + c^2 + d^2} = |\vec{g}| = \sin\theta \quad \text{or} \quad a = \sin\theta, \sqrt{b^2 + c^2 + d^2} = |\vec{g}| = \cos\theta \\
 \end{align*}
 
-Let $h$ equal a quaternion of the form $h = bi + cj + dk$.
+Indeed, both of these formulas work for constructing quaternions from an axis
+and angle. While the second case works, by convention, the first formula is far
+more widely used and accepted, so it will be the one used in this investigation
+hereafter. Hence, $a = \cos\theta \quad |\vec{g}| = \sin\theta$. \\
+
+Let $h$ equal a quaternion of the form $h = bi + cj + dk$. Let the normalization
+of $h$ be $\hat{h} = \frac{h}{|h|}$. \\
 \begin{align*}
-    &|\vec{g}| = |h| = \sqrt{b^2 + c^2 + d^2} \\
-    &bi + cj + dk = \frac{(bi + cj + dk)}{|\vec{g}|}|\vec{g}| = \frac{h}{|h|}|\vec{g}| = \hat{h}\sin\theta
+    &\therefore |\vec{g}| = |h| = \sqrt{b^2 + c^2 + d^2} \\
+    &\Rightarrow bi + cj + dk = (bi + cj + dk)\frac{|\vec{g}|}{|\vec{g}|} = \frac{h}{|h|}|\vec{g}| = \hat{h}\sin\theta
 \end{align*}
 
 Hence, for a rotation by any axis and angle, one can construct a rotation
@@ -1237,19 +1244,46 @@ rotation angle, and $\hat{h}$ represents the normalization of a pure quaternion
 of the form $xi + yj + zk$ where $x$, $y$ and $z$ are the components of a 3D
 vector representing the rotation axis. \\
 
-\pagebreak
-
 When Hamilton was looking into rotation, he discovered that whenever a pure
-quaternion $p$ is multiplied by a rotation quaternion $q$ from the left, the
-transformation inevitably distorts it into the fourth dimension. That is, the
-result of the multiplication is no longer a pure quaternion as
-$\Re(qp) \neq 0$. \\
+quaternion $p$ is multiplied by a rotation quaternion $q$ from the left (that
+is, $q \cdot p$), the transformation inevitably distorts it into the fourth
+dimension.
+
+\begin{align*}
+    qp &= (a + bi + cj + dk)(xi + yj + zk) \\ 
+    &= axi + ayj + azk + bxi^2 + bxij + bxik + cxji + cyj^2 + cyjk + dxki + dykj + dzk^2 \\
+    &= axi + ayj + azk - bx + bxk - bxj - cxk - cy + cyi + dxj - dxi - dz \\
+    &\therefore \Re(qp) = - bx - cy - dz = -(bx + cy + dz) = -\left(\begin{bmatrix}
+        b \\ c \\ d
+    \end{bmatrix} \cdot \begin{bmatrix}
+        x \\ y \\ z
+    \end{bmatrix}\right) \\
+    &\therefore \Re(qp) \neq 0 \quad \text{As long as $\begin{bmatrix}
+        b \\ c \\ d
+    \end{bmatrix}$ is not parallel to $\begin{bmatrix}
+        x \\ y \\ z
+    \end{bmatrix}$ }. \\
+\end{align*}
+That is, the result of the multiplication is no longer a pure quaternion as long
+as the point being rotated does not lie in the rotation axis (in which case no
+transformation on it would occur first place as discussed earlier). \\
 
 Hamilton hence defined the rotation of a pure quaternion $p$ to $r$ by a
 rotation quaternion $q$ as $r = qpq^{-1} = qpq^*$. By multiplying by $q^{-1}$, from the
-right, the change in $\Re(qp)$ is undone, but the change in $\Im(qp)$ is applied
-again. Effectively, this means that the rotation described by $q$ is applied to
-the vector represented by pure quaternion $p$ twice. \\
+right, the change in $\Re(qp)$ is undone,
+
+\begin{align*}
+    qpq^* &= (a + bi + cj + dk)(xi + yj + zk)(a - bi - cj - dk) \\
+    &= (axi + ayj + azk - bx + bxk - bxj - cxk - cy + cyi + dxj - dxi - dz)(a - bi - cj - dk) \\
+    &\text{Expansion of the above has been omitted for brevity, but, notably,} \\
+    &\Re(qpq^*) = -abx - acy - adz + abx - bcy - bdx + acy + bcy - bcx + cdx + bcx + adz + bdx - cdx\\
+    &\text{Cancelling opposite terms,} \quad \Rightarrow\Re(qpq^*) = 0 \\
+\end{align*}
+
+However, by doing this, $\Im(qpq^*)$ is affected twice, first by $q \cdot p$ and
+then by $(qp) \cdot q^*$. Effectively, this means that the rotation described by
+$q$ is applied to the vector represented by pure quaternion $p$ twice, appearing
+to apply twice the rotation angle. \\
 
 Knowing this, one can remedy this problem by simply halving the rotation angle.
 Finally, this leaves us with the following formula for the rotation of a vector
@@ -1263,13 +1297,13 @@ $\vec{v} = \begin{bmatrix} x \\
 \end{bmatrix}$ by an angle $\theta$ using quaternions:
 
 \begin{align*}
-    &\text{Let } p = xi + yj + zk \\
-    &\text{Let } h = bi + cj + dk \\
-    &\text{Let } q = \cos\frac{\theta}{2} + \frac{h}{|h|}\sin\frac{\theta}{2} \\
-    &r = qpq^{-1}
+    &\text{Let } p = xi + yj + zk \quad \text{(the point $(x, y, z)$ being rotated)}\\
+    &\text{Let } h = bi + cj + dk \quad \text{(the axis $\begin{bmatrix}b \\ c \\ d\end{bmatrix}$ around which the rotation happens)} \\
+    &\text{Let } q = \cos\frac{\theta}{2} + \frac{h}{|h|}\sin\frac{\theta}{2} \quad \text{(rotation quaternion $q$ for angle $\theta$)}\\
+    &r = qpq^{-1} \quad \text{(calculating rotated point $r$)}
 \end{align*}
 
-Evaluating $r = qpq^{-1}$, if $q = a_q + b_qi + c_qj + d_qk$
+Evaluating $r = qpq^{-1}$, given that $q = a_q + b_qi + c_qj + d_qk$
 
 \begin{align*}
     qp     & = (- b_qx - c_qy - d_qz)                \\
@@ -1340,41 +1374,37 @@ position vector $\vec{r}$ from $\Im(qpq*)$.
 Looking at the above result, we can see that the formula for rotation using
 quaternions can actually also be represented using a linear transformation
 matrix. This means that, in fact, rotation matrices can be constructed out of
-quaternions as well, without suffering from shortcomings of Euler angles such as
-gimball lock. \\
+quaternions, without suffering from gimball lock, only because quaternions are
+not susceptible to it. This is quite interesting, as it further highlights the
+previously mentioned point about how the usefulness of a rotation matrix depends
+on how it was constructed in the first place. \\
 
 \subsection{Computational complexity}
-Although this formula is admittedly quite long, and might even appear more
-complicated than the formula for deriving rotation matrices from Euler angles,
-it is interesting to note that the contrary could actually be true. \\
+Although this formula may appear more complicated than the one for deriving
+rotation matrices from Euler angles to humans, it harbors some invaluable
+computational savings in computers. The two formulas comprise of the same number
+of scalar multiplications and additions, and so are roughly equivalent in terms
+of computational cost. However, as already mentioned, quaternions do not suffer
+from gimball lock, and so the formula for deriving rotation matrices from
+quaternions is actually much more flexible and less prone to errors at no extra
+cost to the computer. \\
 
-One of the main use cases of quaternions is to allow computers to calculate
-virtual 3D rotation in 3D software. Personally, I use quaternions constantly
-during game development, as they are the preferred rotation option in game
-popular game-making frameworks like the Unity Game Engine, Unreal Engine and
-Godot. Although the formula above may be confusing for a human to keep track of,
-it must be considered that, compared to constructing a rotation matrix from
-Euler angles, it comprises of the same number of multiplications and additions,
-the results of which which can be carried out once and stored in the computer's
-memory, and then used to calculate the rotation of any large number of points
-inexpensively. Given that quaternions also address many of the faults of Euler
-angles, it is clear that they harbor much better value of flexibility for
-performance. \\
-
-In terms of raw storage space, quaternions are also more efficient to store than
-rotation matrices in a computer's memory. A quaternion is comprised of 4 scalar
-numbers, whereas a rotation matrix requires 9. Storing precise non-integer
-numbers, called "floating point numbers" in a computer's memory is
+In terms of raw storage space, however, quaternions are more efficient to store
+than rotation matrices in a computer's memory. A quaternion is comprised of 4
+scalar numbers, whereas a rotation matrix requires 9. Storing precise
+non-integer numbers, called "floating point numbers" in a computer's memory is
 computationally expensive, and so in memory constrained environments,
-quaternions could possibly be a much better option. \\
+quaternions are often a much better option. \\
 
 However, it is important to note that in such environments, if it is acceptable
 to incur some of the shortcomings of Euler angles, then they could be a better
 option for the application as they only require 3 scalar numbers to be stored,
-with the drawback of having to be converted to the aforementioned rotation
-matrix whenever points have to be rotated. In situations where the rotation has
-to be measured, Euler angles could also be a strong choice, which could be a
-possible justification for their usage in the Apollo 11 mission.  \\
+but they must be converted to the aforementioned 9-scalar rotation matrix
+whenever points have to be rotated. \\
+
+In situations where humans have to interact with 3D rotations directly, and the
+computer is computationally constrained, for example, like on the Apollo 11
+mission Euler angles could prove to be a better option.
 
 \subsection{Usability for humans}
 In terms of usability, quaternions are also much harder to interpret from a
@@ -1387,14 +1417,11 @@ themselves with how quaternions work. To that extent, Euler angles are far
 easier to understand and could prove more productive to their application in
 terms of human usability. \\
 
-However, it is important to note that in most cases, the software that uses
-quaternions will provide a graphical interface to allow the user to manipulate
-the axis of rotation, and the angle of rotation, without having to worry about
-the underlying mathematics. In such cases, quaternions could prove to be a
-better option, as they are more flexible and do not suffer from the problems of
-Euler angles. \\
-
-\pagebreak
+However, in most cases, the software that uses quaternions will provide an
+interface to allow the user to manipulate the axis of rotation, and the angle of
+rotation, without having to worry about the underlying mathematics. In such
+cases, quaternions could prove to be a better option, as they are more flexible
+and do not suffer from some of the problems of Euler angles. \\
 
 \subsection{Spherical Linear Interpolation}
 Another aspect of rotations which quaternions excel at is spherical linear
@@ -1412,12 +1439,11 @@ proposed a simple and efficient formula for calculating $q$:
     q = \frac{\sin((1 - t)\theta)}{\sin\theta}q_a + \frac{\sin(t\theta)}{\sin\theta}q_b
 \end{align*}
 
-Although this looks simple for quaternions, the same cannot be said for rotation
-matrices constructed from Euler angles. Indeed, linearly interpolating between
-each individual Euler angle also results in non-smooth movement and unexpected
-jumps. Any spherical linear interpolation formulas proposed for Euler angles
-are, to date complex and expensive to compute compared to what is possible with
-quaternions. \\
+Although this is relatively straightforward for quaternions, the same cannot be
+said for rotation matrices constructed from Euler angles. Because Euler angles
+are, by definition, constrained in $[0, 2\pi]$, the shortest distance between
+two rotations may cross over the $2\pi$ and $0$ boundary, resulting in a
+noticeable ``jump". \\
 
 In that regard, quaternions are a much better option in contexts where motion is
 required, making them convenient for 3D rotation in computer animations, video
@@ -1427,11 +1453,11 @@ games, and CGI. \\
 % cos^2 \theta + sin^2 \theta = 1
 
 \section{Conclusion}
-In conclusion, it cannot be said for sure that quaternions outright supersede
-rotation matrices constructed from Euler angles. Euler angles remain a simpler,
-more intuitive and more human-friendly way to represent rotation, despite their
-shortcomings such as being prone to gimball lock. Meanwhile, quaternions excel
-at their flexibility in terms of ability to be interpolated and represent
+In conclusion, quaternions supersede rotation matrices constructed from Euler
+angles to a partial extent. Euler angles remain a simpler, more intuitive and
+more human-friendly way to represent rotation, despite their shortcomings such
+as being prone to gimball lock. Meanwhile, quaternions excel at their
+flexibility in terms of ability to be smoothly interpolated and represent
 arbitrary rotations without gimball lock. In terms of performance in computing,
 both are on a similar level, though quaternions are slightly more efficient in
 terms of storage space as Euler angles, despite being smaller on their own,
@@ -1444,7 +1470,7 @@ the choice of which to use depends on the context of the application, though
 they are not mutually exclusive - it is often the case that both can be seen
 available for use as a complement to each other. \\
 
-\textbf{Words: } 4000
+\textbf{Words: } 4321
 
 \pagebreak
 \section{Bibliography}
