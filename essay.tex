@@ -1210,7 +1210,8 @@ of $p$ is zero, $p$ is called a "pure quaternion". \\
 
 Like with rotation matrices, one can then construct a ``rotation quaternion" $q =
 a + bi + cj +dk$ that represents a rotation about an axis $\vec{g} =
-\begin{bmatrix} b \\ c \\ d \end{bmatrix}$ by an angle $\theta$. % The axis
+\begin{bmatrix} b \\ c \\ d \end{bmatrix}$ by an angle $\theta$ as follows. %
+
 % represents a direction in 3D space, and is hence a unit vector. That is,
 % $\vec{g} = \vec{\hat{g}}$. \\
 
@@ -1219,9 +1220,9 @@ Considering that $q$ is a unit quaternion,
 \begin{align*}
     &|q| = 1 = |q|^2 = a^2 + b^2 + c^2 + d^2 \\
     &\text{Given that } \sin^2\theta + \cos^2\theta = 1, \\
-    &a^2 + (b^2 + c^2 + d^2) = 1 = \sin^2\theta + \cos^2\theta \\
+    &a^2 + (b^2 + c^2 + d^2) = 1 = \sin^2\theta +c \cos^2\theta \\
     &\text{From this, one could infer that} \\
-    &a = \cos\theta, \sqrt{b^2 + c^2 + d^2} = \sin\theta = |\vec{g}|
+    &a = \cos\theta, \sqrt{b^2 + c^2 + d^2} = |\vec{g}| = \sin\theta \quad or \quad a = \cos\theta, \sqrt{b^2 + c^2 + d^2} = |\vec{g}| = \sin\theta 
 \end{align*}
 
 Let $h$ equal a quaternion of the form $h = bi + cj + dk$.
